@@ -32,7 +32,8 @@
     "test:family-store": "node --experimental-strip-types --conditions=react-server --test tests/family-json.test.mjs tests/family-store.test.mjs tests/family-store-redis.test.mjs tests/family-store-file.test.mjs",
     "test:family-source": "node --experimental-strip-types --conditions=react-server --test tests/family-source.test.mjs tests/family-initialization.test.mjs",
     "family:initialize": "node --env-file-if-exists=.env.family-migration.local --experimental-strip-types --conditions=react-server scripts/initialize-family.mjs",
-    "test:auth": "npm run build && node --test tests/auth.test.mjs tests/auth-redis.test.mjs tests/owner-configuration-http.test.mjs tests/environment.test.mjs"
+    "test:auth": "npm run build && node --test tests/auth.test.mjs tests/auth-redis.test.mjs tests/owner-configuration-http.test.mjs tests/environment.test.mjs",
+    "test": "node --experimental-strip-types --conditions=react-server --test --test-concurrency=2 \"tests/**/*.test.mjs\""
   },
   "dependencies": {
     "@prisma/client": "^6.5.0",

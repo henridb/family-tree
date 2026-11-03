@@ -10,15 +10,44 @@ password for viewing, and a different owner password for editing.
 
 ## 1. Install Git and Node.js
 
-- Install [Git](https://git-scm.com/downloads), which downloads the project onto
-  your computer. On Windows, it also installs **Git Bash**, the terminal used in
-  the instructions below.
-- Install [Node.js](https://nodejs.org/en/download), choosing **version 22.x**.
-  It includes **npm**, which installs and starts the application.
+Git downloads the project onto your computer. Node.js runs the application and
+includes npm, which installs its dependencies. Use **Node.js 22.x**.
 
-After installation, open **Git Bash** from the Windows Start menu, or **Terminal**
-on macOS/Linux. A terminal is a window where you type commands. Run these commands
-one at a time, pressing Enter after each:
+### Windows: use PowerShell and WinGet
+
+Open **PowerShell** from the Start menu. A terminal is a window where you type
+commands. Run these commands one at a time, pressing Enter after each:
+
+```powershell
+winget install --id Git.Git --exact --source winget
+winget install --id OpenJS.NodeJS.22 --exact --source winget
+```
+
+The Node.js installer adds Node and npm to PATH, which lets the terminal find
+their commands. Follow the installation prompts, then close PowerShell or
+Windows Terminal completely and reopen PowerShell to pick up the updated PATH.
+
+If `winget` is not found, install or update **App Installer** using
+[Microsoft’s WinGet instructions](https://learn.microsoft.com/en-us/windows/package-manager/winget/#install-winget),
+then reopen PowerShell. You can also use the
+[Git installer](https://git-scm.com/downloads) and
+[Node.js 22 installer](https://nodejs.org/en/download).
+
+If PowerShell reports that `npm.ps1` cannot run because scripts are disabled, so
+either allow it to run (allowing scripts to run introduces a risk so we let you
+look for how to do it) or use `npm.cmd` wherever the documentation says `npm`;
+for example, `npm.cmd run setup`. This is a PowerShell script-policy issue,
+separate from PATH.
+
+### macOS or Linux: use your terminal and your package manager of choice
+
+Install [Git](https://git-scm.com/downloads) and
+[Node.js 22](https://nodejs.org/en/download) (with `apt`, `brew`, etc...), then
+open **Terminal**.
+
+### Check your installation
+
+On either system, run:
 
 ```sh
 git --version
@@ -26,10 +55,9 @@ node --version
 npm --version
 ```
 
-Each should print a version; Node's should start with `v22.`. If a command is not
-found, close the terminal, reopen it, and try again. If needed, restart the
-computer after installation. On Windows PowerShell, use `npm.cmd` instead of
-`npm` if script execution is blocked, or use Git Bash.
+Each check should print a version; Node’s should start with `v22.`. If a command
+is not found after installation, close the terminal completely, reopen it, and
+check again. If needed, restart the computer.
 
 ## 2. Create your accounts and fork the project
 
@@ -64,7 +92,7 @@ if you need help finding the buttons or cloning your fork.
 
 ## 4. Choose your passwords and start locally
 
-In the same terminal, inside the `family-tree` folder, run:
+Inside the `family-tree` folder, run:
 
 ```sh
 npm ci

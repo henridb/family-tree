@@ -1,0 +1,73 @@
+.node {
+  --partner-gap: calc(2.5rem * var(--tree-scale, 1));
+}
+
+.parent-link {
+  width: var(--partner-gap);
+  height: calc(3px * var(--tree-scale, 1));
+}
+
+.branch-toggle {
+  box-shadow: 0 0 0 calc(1px * var(--tree-scale, 1))
+    color-mix(in oklab, var(--color-amber-900) 40%, transparent);
+}
+
+.parents {
+  --partnership-offset: 0px;
+}
+
+.parents:has(> .person-card + hr + .person-card + hr) {
+  --partnership-offset: calc((var(--card-width) + var(--partner-gap)) / 2);
+}
+
+.branch-toggle[data-side="left"] {
+  left: calc(50% - var(--partnership-offset));
+}
+
+.branch-toggle[data-side="right"] {
+  left: calc(50% + var(--partnership-offset));
+}
+
+/* Outline branches end at the last child's attachment, including when it has descendants. */
+.outline-children > li::before,
+.outline-children > li::after {
+  content: "";
+  position: absolute;
+  left: -0.75rem;
+  background: color-mix(in oklab, var(--color-amber-900) 30%, transparent);
+  pointer-events: none;
+}
+
+.outline-children > li::before {
+  top: 1.25rem;
+  width: 0.75rem;
+  height: 1px;
+}
+
+.outline-children > li::after {
+  top: 0;
+  bottom: -0.5rem;
+  width: 1px;
+}
+
+.outline-children > li:last-child::after {
+  bottom: auto;
+  height: calc(1.25rem + 1px);
+}
+
+.person-details {
+  display: grid;
+  row-gap: 0.2rem;
+  column-gap: 0.5rem;
+  grid-template-columns: max-content minmax(0, 1fr);
+}
+
+.person-details > span:nth-child(odd) {
+  font-style: italic;
+  text-align-last: right;
+}
+
+.person-details > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "sqlite"
+    url      = env("DATABASE_URL")
+}
+
+// Retained legacy scaffold tables. The application does not read or write them.
+// Removing their definitions could drop stored data during db:push.
+model Post {
+    id        Int      @id @default(autoincrement())
+    name      String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([name])
+}
+
+model Person {
+    id        Int       @id @default(autoincrement())
+    name      String
+    lastname  String
+    birthdate DateTime
+    deathdate DateTime?
+    sex       Sex
+
+    partner   Person? @relation("partnership", fields: [partnerid], references: [id])
+    partnerid Int?    @unique
+
+    Person Person? @relation("partnership")
+}
+
+enum Sex {
+    male
+    female
+}
+
+// One shared login budget, persisted across processes using the same database.
+model LoginRateLimit {
+    id          String @id
+    attempts    Int
+    windowStart BigInt
+}

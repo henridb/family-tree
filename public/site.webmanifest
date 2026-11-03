@@ -1,0 +1,15 @@
+{
+  "name": "Family Tree",
+  "short_name": "Family Tree",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "theme_color": "#fef3c7",
+  "background_color": "#fffbeb",
+  "display": "standalone"
+}

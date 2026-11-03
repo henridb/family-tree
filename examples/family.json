@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "revision": 0,
+  "title": "Famille exemple — données fictives",
+  "rootPersonId": "alex",
+  "people": [
+    {
+      "id": "alex",
+      "name": "Alex",
+      "surname": "Martin",
+      "sex": "male",
+      "birthdate": "1940"
+    },
+    {
+      "id": "bea",
+      "name": "Béatrice",
+      "surname": "Durand",
+      "sex": "female",
+      "birthdate": "1942-02"
+    },
+    {
+      "id": "cam",
+      "name": "Camille",
+      "surname": "Martin",
+      "sex": "female",
+      "birthdate": "1970-02-28"
+    },
+    { "id": "unconnected", "name": "Lou", "surname": "Petit", "sex": "female" }
+  ],
+  "partnerships": [
+    { "id": "unionab", "personIds": ["alex", "bea"], "childIds": ["cam"] }
+  ]
+}

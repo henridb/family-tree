@@ -1,0 +1,101 @@
+{
+  "name": "family-tree",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "next build",
+    "check": "npm run lint && npm run typecheck",
+    "db:generate": "prisma migrate dev",
+    "db:migrate": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "dev": "next dev --turbo",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
+    "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
+    "postinstall": "prisma generate",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix --max-warnings 0",
+    "preview": "next build && next start",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "setup": "node --experimental-strip-types --conditions=react-server scripts/setup.mjs",
+    "test:setup": "node --experimental-strip-types --conditions=react-server --test tests/setup.test.mjs",
+    "auth:configure": "node scripts/configure-auth.mjs",
+    "auth:configure-owner": "node scripts/configure-auth.mjs --owner",
+    "auth:save-existing-owner": "node scripts/configure-auth.mjs --owner --save-existing",
+    "auth:save-existing": "node scripts/configure-auth.mjs --save-existing",
+    "test:auth-configure": "node --test tests/auth-configuration.test.mjs",
+    "test:birth-dates": "node --experimental-strip-types --test tests/birth-date.test.mjs",
+    "test:family-search": "node --experimental-strip-types --test tests/family-search.test.mjs",
+    "test:family-document": "node --experimental-strip-types --test tests/family-document.test.mjs",
+    "test:family-store": "node --experimental-strip-types --conditions=react-server --test tests/family-json.test.mjs tests/family-store.test.mjs tests/family-store-redis.test.mjs tests/family-store-file.test.mjs",
+    "test:family-source": "node --experimental-strip-types --conditions=react-server --test tests/family-source.test.mjs tests/family-initialization.test.mjs",
+    "family:initialize": "node --env-file-if-exists=.env.family-migration.local --experimental-strip-types --conditions=react-server scripts/initialize-family.mjs",
+    "test:auth": "npm run build && node --test tests/auth.test.mjs tests/auth-redis.test.mjs tests/owner-configuration-http.test.mjs tests/environment.test.mjs"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.5.0",
+    "@radix-ui/react-checkbox": "^1.2.3",
+    "@radix-ui/react-dialog": "^1.1.11",
+    "@radix-ui/react-label": "^2.1.4",
+    "@radix-ui/react-slot": "^1.2.0",
+    "@t3-oss/env-nextjs": "^0.13.11",
+    "@tanstack/react-query": "^5.105.0",
+    "@trpc/client": "^11.22.1",
+    "@trpc/react-query": "^11.22.1",
+    "@trpc/server": "^11.22.1",
+    "@upstash/redis": "^1.40.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "iron-session": "^9.0.1",
+    "lucide-react": "^0.501.0",
+    "next": "^15.5.28",
+    "next-themes": "^0.4.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-xarrows": "^2.0.2",
+    "server-only": "^0.0.1",
+    "sonner": "^2.0.3",
+    "superjson": "^2.2.1",
+    "tailwind-merge": "^3.2.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@next/eslint-plugin-next": "^15.5.28",
+    "@tailwindcss/postcss": "^4.0.15",
+    "@types/eslint-plugin-jsx-a11y": "^6.10.1",
+    "@types/node": "^20.14.10",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.23.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "postcss": "^8.5.32",
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "prisma": "^6.5.0",
+    "tailwindcss": "^4.0.15",
+    "tw-animate-css": "^1.2.5",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.72.1"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "$postcss"
+    }
+  },
+  "ct3aMetadata": {
+    "initVersion": "7.39.3"
+  },
+  "packageManager": "npm@10.9.2",
+  "license": "GPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/henridb/family-tree.git"
+  },
+  "bugs": {
+    "url": "https://github.com/henridb/family-tree/issues"
+  }
+}

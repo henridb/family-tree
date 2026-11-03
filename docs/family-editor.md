@@ -51,10 +51,10 @@ To display the saved owner password locally:
 node --env-file=.env -e "console.log(JSON.parse(process.env.OWNER_PASSWORD_RECOVERY))"
 ```
 
-For hosted recovery, keep `OWNER_PASSWORD_RECOVERY` in the project's private
-environment settings too, just as for `PASSWORD_RECOVERY`. The app does not read
-either recovery value. These copies use recoverable encoding, not encryption;
-anyone who can read them can recover the passwords. Keep them private.
+Keep the recovery copy in your private local `.env` or a readable backup.
+The app does not read either recovery value. These copies use recoverable
+encoding, not encryption; anyone who can read them can recover the passwords.
+See [password recovery](passwords.md) for details.
 
 ## Make changes
 

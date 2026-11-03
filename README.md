@@ -218,6 +218,22 @@ this version over an existing installation, initialize its private Redis family
 document using [the migration instructions](docs/family-migration.md). Never put
 family exports in `public/`. Keep independent backups outside the hosted store.
 
+## Development checks
+
+After local setup, run:
+
+```sh
+npm run check # lint and TypeScript
+npm run build # prepare the production app used by HTTP tests
+npm test      # run every test suite
+```
+
+The CI workflow runs these checks on pull requests and pushes to `main`.
+It can also be started manually from GitHub Actions. It uses disposable build
+settings and temporary test data; no hosted credentials are needed. Tests that
+exercise Redis requests use local fixtures. The additional Redis Lua test runs
+when `redis-server` and `redis-cli` are installed and is otherwise skipped.
+
 ## License
 
 Copyright (C) 2026 henridb.

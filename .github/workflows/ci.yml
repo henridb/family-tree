@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Lint, types, build and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm install --global "$(node -p 'require("./package.json").packageManager')"
+          npm ci
+
+      - name: Check lint and types
+        run: npm run check
+
+      - name: Build production app
+        env:
+          DATABASE_URL: file:${{ runner.temp }}/family-tree-build.sqlite
+          SESSION_SECRET: Disposable session secret for CI builds only
+        run: |
+          # A deliberately invalid-password hash, used only to validate build settings.
+          export PASSWORD_HASH="$(node -p '"scrypt:" + "0".repeat(32) + ":" + "0".repeat(128)')"
+          npm run build
+
+      - name: Run all tests
+        run: npm test

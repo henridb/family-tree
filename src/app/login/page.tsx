@@ -1,6 +1,6 @@
 "use client";
 
-import { TreeDeciduous } from "lucide-react";
+import Image from "next/image";
 import { useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -39,9 +39,7 @@ export default function LoginPage() {
         onSubmit={handleForm}
       >
         <div className="mb-5 flex items-center gap-3">
-          <span className="rounded-full bg-amber-100 p-3">
-            <TreeDeciduous aria-hidden="true" className="size-6" />
-          </span>
+          <Image src="/logo.svg" alt="" width={48} height={48} />
           <p className="font-semibold tracking-wide">Family Tree</p>
         </div>
         <h1 className="text-2xl font-semibold tracking-tight">

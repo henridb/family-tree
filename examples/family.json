@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "revision": 0,
-  "title": "Famille exemple — données fictives",
+  "title": "Famille exemple — toutes les personnes sont fictives",
   "rootPersonId": "alex",
   "people": [
     {
@@ -9,7 +9,8 @@
       "name": "Alex",
       "surname": "Martin",
       "sex": "male",
-      "birthdate": "1940"
+      "birthdate": "1940",
+      "dead": true
     },
     {
       "id": "bea",
@@ -23,11 +24,117 @@
       "name": "Camille",
       "surname": "Martin",
       "sex": "female",
-      "birthdate": "1970-02-28"
+      "birthdate": "1968-05-12"
     },
+    {
+      "id": "julien",
+      "name": "Julien",
+      "surname": "Martin",
+      "sex": "male",
+      "birthdate": "1971"
+    },
+    {
+      "id": "elodie",
+      "name": "Élodie",
+      "surname": "Martin",
+      "sex": "female",
+      "birthdate": "1975-09"
+    },
+    {
+      "id": "noah",
+      "name": "Noah",
+      "surname": "Bernard",
+      "sex": "male",
+      "birthdate": "1967"
+    },
+    {
+      "id": "mael",
+      "name": "Maël",
+      "surname": "Moreau",
+      "sex": "male",
+      "birthdate": "1970"
+    },
+    {
+      "id": "claire",
+      "name": "Claire",
+      "surname": "Lefèvre",
+      "sex": "female",
+      "birthdate": "1973-04"
+    },
+    {
+      "id": "samuel",
+      "name": "Samuel",
+      "surname": "Roux",
+      "sex": "male",
+      "birthdate": "1974"
+    },
+    {
+      "id": "lea",
+      "name": "Léa",
+      "surname": "Bernard",
+      "sex": "female",
+      "birthdate": "1993-03-21"
+    },
+    {
+      "id": "hugo",
+      "name": "Hugo",
+      "surname": "Bernard",
+      "sex": "male",
+      "birthdate": "1996"
+    },
+    {
+      "id": "lucie",
+      "name": "Lucie",
+      "surname": "Moreau",
+      "sex": "female",
+      "birthdate": "2005-06"
+    },
+    {
+      "id": "zoe",
+      "name": "Zoé",
+      "surname": "Martin",
+      "sex": "female",
+      "birthdate": "1999"
+    },
+    {
+      "id": "louis",
+      "name": "Louis",
+      "surname": "Martin",
+      "sex": "male",
+      "birthdate": "2002-08-11"
+    },
+    {
+      "id": "ines",
+      "name": "Inès",
+      "surname": "Roux",
+      "sex": "female",
+      "birthdate": "2004-11"
+    },
+    { "id": "emma", "name": "Emma", "surname": "Roux", "sex": "female" },
     { "id": "unconnected", "name": "Lou", "surname": "Petit", "sex": "female" }
   ],
   "partnerships": [
-    { "id": "unionab", "personIds": ["alex", "bea"], "childIds": ["cam"] }
+    {
+      "id": "unionab",
+      "personIds": ["alex", "bea"],
+      "childIds": ["cam", "julien", "elodie"]
+    },
+    {
+      "id": "camnoah",
+      "personIds": ["cam", "noah"],
+      "childIds": ["lea", "hugo"],
+      "divorced": true
+    },
+    { "id": "cammael", "personIds": ["cam", "mael"], "childIds": ["lucie"] },
+    {
+      "id": "julienclaire",
+      "personIds": ["julien", "claire"],
+      "childIds": ["zoe", "louis"]
+    },
+    {
+      "id": "elodiesamuel",
+      "personIds": ["elodie", "samuel"],
+      "childIds": ["ines", "emma"]
+    }
   ]
 }

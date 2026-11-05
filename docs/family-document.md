@@ -96,10 +96,15 @@ parent sets, and single-parent relationships need a later contract extension.
 No placeholder people are created automatically for missing parents.
 
 The relative order of partnerships in the document is their display order for
-each participant. The order of `childIds` is the sibling display order. Neither
-is inferred from names, dates, IDs, or returned database order. Reordering people
-does not change the diagram. A future per-person partnership order would require
-an explicit addition to the format.
+each participant. Siblings are displayed oldest first by birth date within each
+partnership, with undated children last. Partial dates sort at the start of their
+known year or month, without adding missing date parts. Children with equal
+dates, and children without dates, retain their relative `childIds` order.
+
+Projection leaves the stored `childIds` array unchanged. Complete document
+exports preserve that order; selected-tree exports use the chronological view.
+Reordering people does not change the diagram. A future per-person partnership
+order would require an explicit addition to the format.
 
 All references, IDs, pairs, and parent-child relationships are validated across
 the entire document, including records outside the view. Ancestry cycles and

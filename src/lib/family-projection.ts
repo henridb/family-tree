@@ -36,13 +36,23 @@ function personRecord(value: human) {
   };
 }
 
+/** Order known ISO dates oldest first, retaining stored order for ties. */
+function compareByBirthDate(first: human, second: human): number {
+  if (first.birthdate === second.birthdate) return 0;
+  if (first.birthdate === undefined) return 1;
+  if (second.birthdate === undefined) return -1;
+  return first.birthdate < second.birthdate ? -1 : 1;
+}
+
 /**
  * Validate a document and build the viewer's descendant tree from its selected
- * or overridden root.
+ * or overridden root, with siblings ordered oldest first by birth date.
  *
  * Return null when the document has no selected root. Preserve person IDs and
- * relationship order while copying records; unconnected people and ancestors
- * remain outside the view.
+ * partnership order while copying records; unconnected people and ancestors
+ * remain outside the view. Undated siblings follow dated ones. Compare partial
+ * dates as written, placing a year/month before finer dates sharing that prefix;
+ * retain stored child order for equal dates and among undated siblings.
  *
  * Throw a Zod error for invalid data, or a FamilyProjectionError for an unknown
  * root, repeated displayed person, more than two partnerships on a branch, or
@@ -114,7 +124,9 @@ export function projectFamilyDocument(
           : { divorced: partnership.divorced }),
       };
       if (partnership.childIds.length) {
-        partner.children = partnership.childIds.map((id) => includePerson(id));
+        partner.children = partnership.childIds
+          .map((id) => includePerson(id))
+          .sort(compareByBirthDate);
         pending.push(...partner.children);
       }
       return partner;

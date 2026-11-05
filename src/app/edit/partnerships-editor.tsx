@@ -168,7 +168,16 @@ export function PartnershipsEditor({
                       />
                       Union signalée comme divorcée
                     </label>
-                    <ol className="space-y-2" aria-label="Enfants dans l’ordre">
+                    <p className="text-sm text-amber-900">
+                      L’arbre classe les enfants par date de naissance, du plus
+                      âgé au plus jeune, avec les dates inconnues à la fin.
+                      L’ordre ci-dessous départage les dates identiques ou
+                      inconnues.
+                    </p>
+                    <ol
+                      className="space-y-2"
+                      aria-label="Ordre enregistré des enfants"
+                    >
                       {union.childIds.map((id, childIndex) => (
                         <li
                           key={id}

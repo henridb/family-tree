@@ -68,8 +68,10 @@ Avoid closing a tab with unsaved changes; the editor asks before discarding them
 - People marked **Sans lien** have no partnership or parent relationship yet.
   They can remain in the document while you enter information progressively.
 - Add a union, select its partners, and attach existing people as its children.
-  Each child belongs to one parental union. Reorder children and unions with
-  their up/down buttons; these orders affect the displayed tree.
+  Each child belongs to one parental union. The tree orders siblings by birth
+  date, oldest first, with undated children last. A partial date sorts at the
+  start of its known year or month. The up/down buttons change partnership
+  order and break ties between children with equal or unknown birth dates.
 - Removing a union or child link keeps the people. A person can be deleted only
   after their relationship references have been removed. Deleting the selected
   root clears the root selection.

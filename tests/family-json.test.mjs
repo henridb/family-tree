@@ -13,6 +13,31 @@ test("full JSON exports preserve unconnected people, identities and metadata", (
   assert.deepEqual(family, before);
 });
 
+test("document exports retain child order while tree exports order siblings by birth date", () => {
+  const family = exampleFamily();
+  family.people.push({
+    id: "older",
+    name: "Robin",
+    surname: "Martin",
+    sex: "male",
+    birthdate: "1960",
+  });
+  family.partnerships[0].childIds = ["unconnected", "cam", "older"];
+  const before = structuredClone(family);
+  const exportedDocument = JSON.parse(exportFamilyJson(family));
+  const exportedTree = JSON.parse(exportFamilyJson(family, { format: "tree" }));
+  assert.deepEqual(exportedDocument.partnerships[0].childIds, [
+    "unconnected",
+    "cam",
+    "older",
+  ]);
+  assert.deepEqual(
+    exportedTree.partners[0].children.map(({ id }) => id),
+    ["older", "cam", "unconnected"],
+  );
+  assert.deepEqual(family, before);
+});
+
 test("handwritten nested JSON validates and round-trips known fields and defaults", () => {
   const text =
     '{"id":"alex","name":"Alex","surname":"Martin","sex":"male","birthdate":"1940","partners":[{"id":"bea","name":"Beatrice","surname":"Durand","sex":"female","children":[{"id":"cam","name":"Camille","surname":"Martin","sex":"female","birthdate":"1970-02"}]}]}';

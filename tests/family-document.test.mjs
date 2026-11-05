@@ -255,14 +255,120 @@ test("participant position does not determine gender, parent role or projection"
   );
 });
 
-test("partnership and child arrays explicitly determine display ordering", () => {
+test("partnership order is preserved while birth dates determine sibling order", () => {
   const stored = document();
   stored.partnerships.reverse();
   stored.partnerships.find(({ id }) => id === "u1").childIds.reverse();
   const expected = structuredClone(tree);
-  expected.partners[0].children.reverse();
   expected.partners.reverse();
   assert.deepEqual(projectFamilyDocument(stored), expected);
+});
+
+/** @type {{name: string, children: [string, string?][], expected: string[]}[]} */
+const siblingOrderCases = [
+  {
+    name: "full dates compare year, month and day",
+    children: [
+      ["latest", "2001-01-01"],
+      ["latermonth", "2000-12-01"],
+      ["laterday", "2000-02-20"],
+      ["earlierday", "2000-02-01"],
+      ["earliest", "1999-12-31"],
+    ],
+    expected: ["earliest", "earlierday", "laterday", "latermonth", "latest"],
+  },
+  {
+    name: "partial dates sort at the start of their year or month",
+    children: [
+      ["februaryday", "2000-02-01"],
+      ["januaryday", "2000-01-01"],
+      ["yearonly", "2000"],
+      ["februaryonly", "2000-02"],
+      ["januaryonly", "2000-01"],
+    ],
+    expected: [
+      "yearonly",
+      "januaryonly",
+      "januaryday",
+      "februaryonly",
+      "februaryday",
+    ],
+  },
+  {
+    name: "equal dates stay stable and undated siblings come last",
+    children: [
+      ["unknownz"],
+      ["twinz", "2000-02-01"],
+      ["unknowna"],
+      ["twina", "2000-02-01"],
+      ["older", "1999"],
+    ],
+    expected: ["older", "twinz", "twina", "unknownz", "unknowna"],
+  },
+];
+
+for (const { name, children, expected } of siblingOrderCases) {
+  test(`sibling ordering: ${name}`, () => {
+    const source = {
+      ...human("parent"),
+      partners: [
+        {
+          ...human("partner"),
+          children: children.map(([id, date]) =>
+            human(id, {
+              name: id,
+              ...(date === undefined ? {} : { birthdate: birthDate(date) }),
+            }),
+          ),
+        },
+      ],
+    };
+    const stored = familyDocumentFromTree(source);
+    const before = structuredClone(stored);
+    const projected = projectFamilyDocument(freeze(stored));
+    assert.deepEqual(
+      projected.partners[0].children.map(({ id }) => id),
+      expected,
+    );
+    assert.deepEqual(
+      projected.partners[0].children.map(({ id, birthdate }) => [
+        id,
+        birthdate,
+      ]),
+      expected.map((id) => [
+        id,
+        children.find(([childId]) => childId === id)?.[1],
+      ]),
+    );
+    assert.deepEqual(stored, before);
+  });
+}
+
+test("siblings are ordered independently in each partnership and generation", () => {
+  const source = structuredClone(tree);
+  source.partners[0].children[1].birthdate = birthDate("1960");
+  source.partners[0].children[0].partners[0].children = [
+    human("younggrandchild", { birthdate: birthDate("2000") }),
+    human("oldgrandchild", { birthdate: birthDate("1990") }),
+  ];
+  source.partners[1].children = [
+    human("otherchild", { birthdate: birthDate("1962") }),
+    human("otherolderchild", { birthdate: birthDate("1959") }),
+  ];
+  const stored = familyDocumentFromTree(source);
+  const projected = projectFamilyDocument(stored);
+  assert.deepEqual(
+    projected.partners[0].children.map(({ id }) => id),
+    ["flo", "cam"],
+  );
+  assert.deepEqual(
+    projected.partners[0].children[1].partners[0].children.map(({ id }) => id),
+    ["oldgrandchild", "younggrandchild"],
+  );
+  assert.deepEqual(
+    projected.partners[1].children.map(({ id }) => id),
+    ["otherolderchild", "otherchild"],
+  );
 });
 
 test("parsing, converting and projecting do not mutate or share mutable records", () => {

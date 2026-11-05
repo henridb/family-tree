@@ -28,6 +28,73 @@
   left: calc(50% + var(--partnership-offset));
 }
 
+/* Share family columns so unequal descendant branches cannot overlap their rails. */
+.node[data-two-partners] {
+  --subtree-gap: calc(5rem * var(--tree-scale, 1));
+  --subtree-inset: calc((var(--card-width) + var(--subtree-gap)) / 2);
+  display: grid;
+  grid-template-columns:
+    max-content var(--partner-gap) var(--card-width)
+    var(--partner-gap) max-content;
+  justify-content: center;
+}
+
+.node[data-two-partners] > .parents,
+.node[data-two-partners] > .kids {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  column-gap: 0;
+}
+
+.node[data-two-partners] > .parents > .person-card {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.node[data-two-partners] > .parents > [data-partner-side="left"] {
+  grid-column: 1;
+  justify-self: end;
+}
+
+.node[data-two-partners] > .parents > [data-partner-side="right"] {
+  grid-column: 5;
+  justify-self: start;
+}
+
+.node[data-two-partners] > .parents > [data-side="left"] {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.node[data-two-partners] > .parents > [data-side="right"] {
+  grid-column: 4;
+  grid-row: 1;
+}
+
+.node[data-two-partners] > .parents > .branch-toggle {
+  position: relative;
+  top: auto;
+  left: auto;
+  justify-self: center;
+  translate: none;
+}
+
+/* Share the owner's column below the cards, leaving a smaller subtree gutter. */
+.node[data-two-partners] > .kids > [data-side="left"] {
+  grid-column: 1 / 4;
+  grid-row: 1;
+  justify-self: end;
+  margin-right: var(--subtree-inset);
+}
+
+.node[data-two-partners] > .kids > [data-side="right"] {
+  grid-column: 3 / -1;
+  grid-row: 1;
+  justify-self: start;
+  margin-left: var(--subtree-inset);
+}
+
 /* Outline branches end at the last child's attachment, including when it has descendants. */
 .outline-children > li::before,
 .outline-children > li::after {

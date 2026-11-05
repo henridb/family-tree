@@ -80,10 +80,19 @@ export function Tree({
   const hasExpandedChildren = person.partners?.some(
     (partner) => Boolean(partner.children?.length) && !isCollapsed(partner.id),
   );
+  const hasTwoVisiblePartners =
+    person.partners?.length === 2 &&
+    person.partners.every(
+      (partner) =>
+        !searchActive ||
+        Boolean(partner.children?.length) ||
+        partner.match === true,
+    );
   return (
     <Node
       className="node relative flex flex-col"
       id={isRoot ? "tree_root" : undefined}
+      data-two-partners={hasTwoVisiblePartners || undefined}
     >
       <div className="parents relative flex flex-row items-center justify-center">
         {person.partners?.length === 2 &&
@@ -93,6 +102,7 @@ export function Tree({
             <>
               <PersonCard
                 person={person.partners.at(1)!}
+                partnerSide="left"
                 partnerName={
                   person.partners.at(1)?.divorced ? undefined : person.name
                 }
@@ -144,6 +154,7 @@ export function Tree({
               />
               <PersonCard
                 person={person.partners.at(0)!}
+                partnerSide="right"
                 partnerName={
                   person.partners.at(0)?.divorced ? undefined : person.name
                 }
@@ -195,6 +206,9 @@ export function Tree({
               partner.children.length !== 0 && (
                 <div
                   key={partner.id}
+                  data-side={
+                    partner.id === person.partners?.[0]?.id ? "right" : "left"
+                  }
                   id={partnershipElementId(
                     person.id,
                     partner.id,
@@ -268,6 +282,7 @@ export const PersonCard = memo(function PersonCard({
   isRoot = false,
   context,
   compact = false,
+  partnerSide,
   onCardKeyDown,
   partnerName,
   partnerSurname,
@@ -279,6 +294,7 @@ export const PersonCard = memo(function PersonCard({
   isRoot?: boolean;
   context: FamilyContext;
   compact?: boolean;
+  partnerSide?: "left" | "right";
   onCardKeyDown?: (event: KeyboardEvent<HTMLButtonElement>) => void;
   partnerName?: string;
   partnerSurname?: string;
@@ -312,6 +328,7 @@ export const PersonCard = memo(function PersonCard({
             id={personElementId(person.id)}
             onKeyDown={onCardKeyDown}
             data-person-id={person.id}
+            data-partner-side={partnerSide}
             data-generation={generation}
             data-root-person={isRoot || undefined}
             data-search-match={person.match ? true : undefined}

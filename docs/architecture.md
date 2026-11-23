@@ -75,8 +75,9 @@ See [the setup guide](setup.md) for dashboard configuration and
 ## Identity and projection
 
 People and partnerships have permanent lowercase alphanumeric IDs. Preserve
-them when correcting names or dates. Explicit partnership and child order
-controls the displayed order. Search annotations, generation context and married
+them when correcting names or dates. Partnerships follow their saved order.
+Siblings appear oldest first by birth date, with undated children last; saved
+child order breaks ties. Search annotations, generation context and married
 display surnames are derived rather than stored as authoritative records.
 
 The document may contain people outside the displayed tree. The viewer has

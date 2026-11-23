@@ -69,9 +69,14 @@ or projection behavior. Preserve stable IDs, ordering and revision checks.
 ## Editor and database tools
 
 In VS Code, select **TypeScript: Select TypeScript Version… → Use Workspace
-Version** to match project diagnostics. The workspace recommends ESLint,
-Prettier, Tailwind CSS IntelliSense and Prisma, with Prisma's language server
-pinned to schema version 6.
+Version** to match project diagnostics. Copy `.vscode/settings.example.json` to
+`.vscode/settings.json` for the workspace TypeScript prompt and Prisma 6 language
+server setting. If you already have local settings, merge these entries instead
+of replacing the file. The local settings file is ignored by Git so any personal
+project settings remain private.
+
+Extension recommendations remain shared in `.vscode/extensions.json`: ESLint,
+Prettier, Tailwind CSS IntelliSense and Prisma.
 
 `npm ci` generates the Prisma client. After schema changes, use
 `npm exec -- prisma generate` to refresh its types. Next.js regenerates

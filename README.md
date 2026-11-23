@@ -28,6 +28,12 @@ These screenshots use the fictional family in [examples/family.json](examples/fa
 
 ## Create your own tree
 
+To try the fictional example locally after cloning your fork, run `npm ci` and
+then `npm run dev:demo`. Open <http://localhost:3000> with password `demo-family`;
+use `demo-owner` on `/edit`. No setup or `.env` file is needed. Each run starts a
+fresh demo, separate from your configured family. See the
+[development guide](CONTRIBUTING.md#start-a-development-copy) for details.
+
 The [step-by-step setup guide](docs/setup.md) starts from a computer with no
 development tools installed. Here is the route from download to a shared website:
 

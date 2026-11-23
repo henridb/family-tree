@@ -10,7 +10,25 @@ Use Node.js 22 and npm 10.9.2. The `.node-version` and `packageManager` settings
 record the supported tools. With fnm configured, entering the directory can
 select the Node version automatically.
 
-After cloning your fork, run:
+For a quick local demo after cloning your fork, run:
+
+```sh
+npm ci
+npm run dev:demo
+```
+
+Open <http://localhost:3000> with viewing password `demo-family`, or `/edit`
+with owner password `demo-owner`. Setup and a `.env` file are not needed. The
+server listens only on your computer because these demo passwords are public.
+
+Each run starts a fresh copy of `examples/family.json` with its own family file
+and login database under ignored `.data/demo-*` storage. Demo edits are not
+reused on the next run. Your `.env`, configured family and the checked-in example
+are preserved. Download any demo edits you want to keep before stopping the
+server with **Ctrl+C**. To use another port, run
+`npm run dev:demo -- --port 3001`.
+
+To configure a persistent local family with your own passwords instead, run:
 
 ```sh
 npm ci
@@ -32,6 +50,10 @@ npm run check # lint and TypeScript
 npm run build # production app required by the HTTP tests
 npm test      # all test suites, including setup and HTTP authentication
 ```
+
+The demo command supplies settings only to its own server process. To build
+without running setup, use disposable settings as shown in the
+[CI workflow](.github/workflows/ci.yml). Stop the dev server before building.
 
 Lint warnings fail the check. `npm run lint:fix` applies available fixes. Use
 Prettier on the files you change; the repository's `format:check` and

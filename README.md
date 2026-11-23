@@ -10,6 +10,7 @@ owner password for editing. The interface is currently in French.
 
 - Add people and relationships at your own pace, including incomplete dates.
 - Search names, open person details, and collapse branches.
+- View siblings in birth-date order, oldest first, with unknown dates last.
 - Explore the diagram on a computer or use the compact view on a phone.
 - Import and download your family as JSON, and recover recent saved versions.
 

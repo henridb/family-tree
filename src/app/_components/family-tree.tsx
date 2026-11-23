@@ -16,6 +16,10 @@ import { api } from "@/trpc/react";
 import { type person } from "@/types/family";
 import { searchFamily } from "@/lib/family-search";
 import { partnershipElementId } from "@/lib/family-identities";
+import {
+  familyGenerationBranches,
+  collapseFromGeneration,
+} from "@/lib/family-collapse";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Xwrapper } from "react-xarrows";
 import { Tree } from "../tree";
@@ -24,6 +28,7 @@ import { TreeViewport } from "./tree-viewport";
 import { useMediaQuery } from "./use-media-query";
 import { FamilyOutline } from "./family-outline";
 import { SearchHelp } from "./search-help";
+import { GenerationControls } from "./generation-controls";
 import { familyContexts, type FamilyContext } from "@/lib/family-context";
 
 /**
@@ -75,6 +80,11 @@ export function FamilyTree() {
   const [collapsedBranches, setCollapsedBranches] = useState<
     ReadonlySet<string>
   >(() => new Set());
+  const [overviewVersion, setOverviewVersion] = useState(0);
+  const generationBranches = useMemo(
+    () => (family.data ? familyGenerationBranches(family.data) : []),
+    [family.data],
+  );
   /** Toggle one partnership's descendant visibility using a new set of permanent branch IDs. */
   function toggleBranch(ownerId: string, partnerId: string) {
     const id = partnershipElementId(ownerId, partnerId, "descendants");
@@ -157,6 +167,7 @@ export function FamilyTree() {
         <Xwrapper>
           <TreeViewport
             view={showList ? "list" : "tree"}
+            overviewVersion={overviewVersion}
             renderControls={(navigation) => (
               <div className="relative z-100 shrink-0 lg:fixed lg:top-0 lg:left-0 lg:w-[22.25rem]">
                 <section
@@ -265,6 +276,19 @@ export function FamilyTree() {
                             </Label>
                           </div>
                         </fieldset>
+                        <GenerationControls
+                          generationCount={generationBranches.length}
+                          searchActive={search?.hasQuery ?? false}
+                          onHideFromGeneration={(generation) => {
+                            setCollapsedBranches(
+                              collapseFromGeneration(
+                                generationBranches,
+                                generation,
+                              ),
+                            );
+                            setOverviewVersion((version) => version + 1);
+                          }}
+                        />
                         <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:items-center sm:gap-2 lg:gap-2">
                           <Label htmlFor="query-input">Recherche:</Label>
                           <div className="flex min-w-0 items-center gap-1 sm:max-w-md sm:flex-1">

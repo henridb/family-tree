@@ -30,6 +30,7 @@ export function TreeViewport({
   onToggleBranch,
   hasCollapsed = false,
   hasTree = true,
+  overviewVersion = 0,
 }: {
   children: (
     scale: number,
@@ -46,6 +47,7 @@ export function TreeViewport({
   onToggleBranch: (ownerId: string, partnerId: string) => void;
   hasCollapsed?: boolean;
   hasTree?: boolean;
+  overviewVersion?: number;
 }) {
   // Recalculate connectors after display settings change the tree's layout.
   useXarrow();
@@ -93,7 +95,7 @@ export function TreeViewport({
 
   useLayoutEffect(() => {
     centerRoot();
-  }, [centerRoot]);
+  }, [centerRoot, overviewVersion]);
 
   useLayoutEffect(() => {
     if (previousView.current === view) return;

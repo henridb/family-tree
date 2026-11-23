@@ -20,6 +20,25 @@ pinch or Ctrl+wheel also zooms around the gesture position.
 On phones, select the settings heading to close or reopen the controls. Very
 short screens start with these controls closed to leave more room for the tree.
 
+## Hide later generations
+
+To make a crowded tree easier to read, use **Cacher les générations**. Choosing
+**3+** immediately hides generation 3 and every later generation, leaving the
+first two generations visible across all branches. The dropdown returns to
+**—** afterward so you can repeat the action as needed.
+
+Choosing a cutoff replaces previous branch-collapse choices and returns to the
+top while keeping the zoom level. It is a one-time action: the **+** buttons can
+then reveal another generation within individual branches, and **Tout déplier**
+opens everything. The same choices apply to the diagram and compact view.
+
+Select **?** beside the dropdown for help; it also opens on hover or keyboard
+focus.
+
+During search, matching paths temporarily expand and the generation control is
+disabled. Clear the search to restore the previous view. These viewing choices
+do not change saved family records.
+
 ## Use the compact mobile view
 
 Select **Vue compacte**, the branching-list icon beside the mobile settings

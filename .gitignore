@@ -53,3 +53,6 @@ yarn-error.log*
 # idea files
 .idea
 .vercel
+
+# Personal VS Code settings, including project colors.
+/.vscode/settings.json

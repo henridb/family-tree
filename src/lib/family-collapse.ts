@@ -35,3 +35,21 @@ export function collapseFromGeneration(
     for (const id of branches) collapsed.add(id);
   return collapsed;
 }
+
+/** Return the matching cutoff, null for an open tree, or undefined for custom branches. */
+export function generationCollapsePreset(
+  levels: readonly ReadonlySet<string>[],
+  collapsedBranches: ReadonlySet<string>,
+): number | null | undefined {
+  if (collapsedBranches.size === 0) return null;
+  const firstLevel = levels.findIndex((branches) =>
+    [...branches].some((id) => collapsedBranches.has(id)),
+  );
+  if (firstLevel === -1) return undefined;
+  const generation = firstLevel + 2;
+  const preset = collapseFromGeneration(levels, generation);
+  return preset.size === collapsedBranches.size &&
+    [...preset].every((id) => collapsedBranches.has(id))
+    ? generation
+    : undefined;
+}

@@ -19,6 +19,7 @@ import { partnershipElementId } from "@/lib/family-identities";
 import {
   familyGenerationBranches,
   collapseFromGeneration,
+  generationCollapsePreset,
 } from "@/lib/family-collapse";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Xwrapper } from "react-xarrows";
@@ -84,6 +85,10 @@ export function FamilyTree() {
   const generationBranches = useMemo(
     () => (family.data ? familyGenerationBranches(family.data) : []),
     [family.data],
+  );
+  const hiddenFromGeneration = useMemo(
+    () => generationCollapsePreset(generationBranches, collapsedBranches),
+    [generationBranches, collapsedBranches],
   );
   /** Toggle one partnership's descendant visibility using a new set of permanent branch IDs. */
   function toggleBranch(ownerId: string, partnerId: string) {
@@ -278,20 +283,23 @@ export function FamilyTree() {
                         </fieldset>
                         <GenerationControls
                           generationCount={generationBranches.length}
+                          hiddenFromGeneration={hiddenFromGeneration}
                           searchActive={search?.hasQuery ?? false}
                           onHideFromGeneration={(generation) => {
                             setCollapsedBranches(
-                              collapseFromGeneration(
-                                generationBranches,
-                                generation,
-                              ),
+                              generation === null
+                                ? new Set()
+                                : collapseFromGeneration(
+                                    generationBranches,
+                                    generation,
+                                  ),
                             );
                             setOverviewVersion((version) => version + 1);
                           }}
                         />
                         <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:items-center sm:gap-2 lg:gap-2">
                           <Label htmlFor="query-input">Recherche:</Label>
-                          <div className="flex min-w-0 items-center gap-1 sm:max-w-md sm:flex-1">
+                          <div className="flex min-w-0 items-center gap-1 sm:flex-1">
                             <Input
                               className="h-9 min-w-0 border-amber-900/20 bg-white/60 lg:h-8"
                               type="text"

@@ -3,6 +3,7 @@ import { test } from "node:test";
 import {
   familyGenerationBranches,
   collapseFromGeneration,
+  generationCollapsePreset,
 } from "../src/lib/family-collapse.ts";
 
 /** @returns {import('../src/types/family.ts').person} A fictional four-generation tree. */
@@ -84,6 +85,25 @@ test("generation levels include leaves and share the same level with partners", 
       [],
     ],
   );
+});
+
+test("the selection reflects cutoffs, fully expanded trees and custom branches", () => {
+  const levels = familyGenerationBranches(family());
+  assert.equal(generationCollapsePreset(levels, new Set()), null);
+  for (const generation of [2, 3, 4])
+    assert.equal(
+      generationCollapsePreset(
+        levels,
+        collapseFromGeneration(levels, generation),
+      ),
+      generation,
+    );
+
+  const custom = new Set(collapseFromGeneration(levels, 2));
+  custom.delete("descendants-root-partner");
+  assert.equal(generationCollapsePreset(levels, custom), undefined);
+  custom.delete("descendants-root-former");
+  assert.equal(generationCollapsePreset(levels, custom), 3);
 });
 
 test("a cutoff closes all deeper branches while reopening every earlier generation", () => {

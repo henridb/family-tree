@@ -65,6 +65,39 @@ function hashPassword(password, salt) {
   }).toString("hex");
 }
 
+test("rotating the viewing password cannot reuse the configured owner password", () => {
+  const ownerPassword = "Separate owner password";
+  const existing = configureAuth(
+    configureAuth(template, "Original viewing password"),
+    ownerPassword,
+    { owner: true },
+  );
+  assert.throws(() => configureAuth(existing, ownerPassword), /must differ/);
+
+  const before = parseEnv(existing);
+  const rotated = parseEnv(
+    configureAuth(existing, "Different viewing password"),
+  );
+  assert.equal(rotated.OWNER_PASSWORD_HASH, before.OWNER_PASSWORD_HASH);
+  assert.equal(rotated.OWNER_PASSWORD_RECOVERY, before.OWNER_PASSWORD_RECOVERY);
+  assert.notEqual(rotated.SESSION_SECRET, before.SESSION_SECRET);
+  const [, salt, expected] = rotated.PASSWORD_HASH.split(":");
+  assert.equal(hashPassword("Different viewing password", salt), expected);
+});
+
+test("viewing rotation rejects a malformed owner hash while owner rotation can repair it", () => {
+  const existing = `${configureAuth(template, "Original viewing password")}OWNER_PASSWORD_HASH="invalid"\r\n`;
+  assert.throws(
+    () => configureAuth(existing, "New viewing password"),
+    /valid OWNER_PASSWORD_HASH/,
+  );
+  const repaired = parseEnv(
+    configureAuth(existing, "New owner password", { owner: true }),
+  );
+  const [, salt, expected] = repaired.OWNER_PASSWORD_HASH.split(":");
+  assert.equal(hashPassword("New owner password", salt), expected);
+});
+
 /**
  * Load fixture dotenv text through Next.js in a fresh process and return its
  * parsed variables.

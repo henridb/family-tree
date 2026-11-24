@@ -27,10 +27,10 @@ function derivePassword(password, salt) {
  * a file.
  *
  * New viewing credentials also replace the session secret. New owner
- * credentials preserve viewing access and must use a different password. With
- * `saveExisting`, verify the selected existing hash and update only its
- * recovery copy, preserving hashes and sessions. Recovery is reversible
- * encoding, not encryption.
+ * credentials preserve viewing access. New passwords must differ from the
+ * other configured role's password. With `saveExisting`, verify the selected
+ * existing hash and update only its recovery copy, preserving hashes and
+ * sessions. Recovery is reversible encoding, not encryption.
  *
  * Reject invalid passwords or configuration before returning any changes;
  * preserve unrelated entries and the existing newline style.
@@ -69,22 +69,27 @@ export function configureAuth(
     throw new Error("Use a password between 6 and 1024 characters.");
   }
 
-  if (owner && !saveExisting) {
-    const storedHash = parseEnv(configuration).PASSWORD_HASH;
-    if (!/^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$/.test(storedHash ?? ""))
-      throw new Error(
-        "Configure viewing access first with npm run auth:configure.",
-      );
-    const [, salt, expected] = storedHash.split(":");
-    if (
-      timingSafeEqual(
-        derivePassword(password, salt),
-        Buffer.from(expected, "hex"),
+  if (!saveExisting) {
+    const otherHashKey = owner ? "PASSWORD_HASH" : "OWNER_PASSWORD_HASH";
+    const storedHash = parseEnv(configuration)[otherHashKey];
+    if (owner || storedHash) {
+      if (!/^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$/.test(storedHash ?? ""))
+        throw new Error(
+          owner
+            ? "Configure viewing access first with npm run auth:configure."
+            : "The .env file must contain a valid OWNER_PASSWORD_HASH.",
+        );
+      const [, salt, expected] = storedHash.split(":");
+      if (
+        timingSafeEqual(
+          derivePassword(password, salt),
+          Buffer.from(expected, "hex"),
+        )
       )
-    )
-      throw new Error(
-        "The owner password must differ from the shared viewing password.",
-      );
+        throw new Error(
+          "The owner password must differ from the shared viewing password.",
+        );
+    }
   }
 
   // Single-quoted JSON survives dotenv quoting and Next.js variable expansion.

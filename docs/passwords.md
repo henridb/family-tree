@@ -19,6 +19,9 @@ accept 6–1024 characters and update your ignored `.env` file. Changing the vie
 password signs out existing sessions. Changing only the owner password signs
 out owners while preserving viewing access.
 
+Both commands reject a new password that matches the other configured password,
+so changing viewing access cannot accidentally disable owner login.
+
 For a hosted site, copy the updated settings to Vercel's private Production
 environment variables and redeploy. A viewing-password change updates
 `PASSWORD_HASH`, `SESSION_SECRET` and `PASSWORD_RECOVERY`; an owner-password

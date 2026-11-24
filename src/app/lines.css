@@ -36,6 +36,8 @@
   grid-template-columns:
     max-content var(--partner-gap) var(--card-width)
     var(--partner-gap) max-content;
+  /* Keep cards at their natural height when neighboring branches are taller. */
+  grid-template-rows: max-content max-content;
   justify-content: center;
 }
 

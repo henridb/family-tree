@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ZodError } from "zod";
 import { PeopleEditor } from "./people-editor";
 import { PartnershipsEditor } from "./partnerships-editor";
@@ -112,6 +112,7 @@ function FamilyEditor({
   const [message, setMessage] = useState("");
   const [fileError, setFileError] = useState("");
   const [loading, setLoading] = useState(false);
+  const leaveWithoutSaving = useRef(false);
   const dirty = JSON.stringify(draft) !== JSON.stringify(base ?? emptyDocument);
   const validation = useMemo(() => {
     try {
@@ -160,6 +161,7 @@ function FamilyEditor({
     if (!dirty) return;
     /** Ask the browser to warn before leaving a page with unsaved draft changes. */
     const beforeUnload = (event: BeforeUnloadEvent) => {
+      if (leaveWithoutSaving.current) return;
       event.preventDefault();
       event.returnValue = "";
     };
@@ -169,8 +171,11 @@ function FamilyEditor({
   const save = api.editor.save.useMutation();
   const restore = api.editor.restore.useMutation();
   const logout = api.editor.logout.useMutation({
-    /** Leave the editor after the owner logout succeeds. */
-    onSuccess: () => window.location.replace("/edit/login"),
+    /** Leave only after a confirmed logout, preserving the draft if the request fails. */
+    onSuccess: () => {
+      leaveWithoutSaving.current = true;
+      window.location.replace("/edit/login");
+    },
   });
   const busy =
     loading || save.isPending || restore.isPending || logout.isPending;
@@ -263,7 +268,6 @@ function FamilyEditor({
                   !dirty ||
                   window.confirm("Quitter sans enregistrer le brouillon ?")
                 ) {
-                  setDraft(structuredClone(base ?? emptyDocument));
                   logout.mutate();
                 }
               }}

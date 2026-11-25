@@ -1,5 +1,9 @@
 "use client";
 
+import { LanguageSwitcher } from "./language-switcher";
+
+import { useTranslations } from "next-intl";
+
 import { useRouter } from "next/navigation";
 import {
   ChevronDown,
@@ -61,6 +65,8 @@ function diagramStyle(scale: number): CSSProperties & {
  * view, and redirect expired sessions to the viewing login.
  */
 export function FamilyTree() {
+  const t = useTranslations("viewer");
+  const common = useTranslations("common");
   const isDesktop = useMediaQuery("(min-width: 64rem)");
   const isShortScreen = useMediaQuery("(max-height: 20rem)");
   const family = api.person.getTree.useQuery(undefined, { retry: false });
@@ -142,22 +148,22 @@ export function FamilyTree() {
   if (family.isPending)
     return (
       <main role="status" className="p-10">
-        Chargement de l’arbre…
+        {t("loading")}
       </main>
     );
   if (family.error)
     return (
       <main role="alert" className="p-10">
         {family.error.data?.code === "PRECONDITION_FAILED"
-          ? "Cet arbre n’est pas encore configuré."
-          : "Impossible de charger l’arbre."}{" "}
-        <Button onClick={() => void family.refetch()}>Réessayer</Button>
+          ? t("notConfigured")
+          : t("failed")}{" "}
+        <Button onClick={() => void family.refetch()}>{common("retry")}</Button>
       </main>
     );
   if (!family.data)
     return (
       <main role="status" className="p-10">
-        Aucune personne de départ n’a encore été choisie pour cet arbre.
+        {t("noRoot")}
       </main>
     );
 
@@ -168,7 +174,7 @@ export function FamilyTree() {
         style={treeStyle}
         className="flex h-dvh w-full min-w-0 flex-col overflow-hidden text-sm"
       >
-        <h1 className="sr-only">Arbre généalogique</h1>
+        <h1 className="sr-only">{t("title")}</h1>
         <Xwrapper>
           <TreeViewport
             view={showList ? "list" : "tree"}
@@ -177,7 +183,7 @@ export function FamilyTree() {
               <div className="relative z-100 shrink-0 lg:fixed lg:top-0 lg:left-0 lg:w-[22.25rem]">
                 <section
                   id="tree-controls"
-                  aria-label="Options de l’arbre"
+                  aria-label={t("options")}
                   className="border-b border-amber-900/20 bg-[#eadfbd] shadow-sm lg:rounded-br-lg lg:border-r lg:border-amber-900/20 lg:bg-[#eadfbd]/95 lg:p-3 lg:backdrop-blur-xs"
                 >
                   <div className="flex items-center lg:hidden">
@@ -193,10 +199,10 @@ export function FamilyTree() {
                           aria-hidden="true"
                           className="size-3.5"
                         />
-                        Options de l’arbre
+                        {t("options")}
                         {!settingsOpen && search?.hasQuery && (
                           <span className="ml-auto rounded bg-amber-950/10 px-1.5 py-0.5 text-[10px] whitespace-nowrap">
-                            Filtre actif
+                            {t("filterActive")}
                           </span>
                         )}
                         <ChevronDown
@@ -207,26 +213,26 @@ export function FamilyTree() {
                     </h2>
                     <div
                       role="group"
-                      aria-label="Vue de la famille"
+                      aria-label={t("views")}
                       className="flex gap-1 pr-2"
                     >
                       <Button
                         size="icon"
                         variant={view === "tree" ? "secondary" : "ghost"}
-                        aria-label="Vue arbre"
+                        aria-label={t("diagram")}
                         aria-pressed={view === "tree"}
                         onClick={() => setView("tree")}
-                        title="Vue arbre"
+                        title={t("diagram")}
                       >
                         <Network aria-hidden="true" />
                       </Button>
                       <Button
                         size="icon"
                         variant={view === "list" ? "secondary" : "ghost"}
-                        aria-label="Vue compacte"
+                        aria-label={t("compact")}
                         aria-pressed={view === "list"}
                         onClick={() => setView("list")}
-                        title="Vue compacte"
+                        title={t("compact")}
                       >
                         <ListTree aria-hidden="true" />
                       </Button>
@@ -240,8 +246,9 @@ export function FamilyTree() {
                   >
                     <div className="min-h-0 overflow-hidden">
                       <div className="space-y-3 px-3 pb-3 lg:space-y-2 lg:p-0">
+                        <LanguageSwitcher />
                         <fieldset className="flex min-w-0 flex-wrap gap-x-6 gap-y-3 lg:flex-col lg:gap-0">
-                          <legend className="sr-only">Affichage</legend>
+                          <legend className="sr-only">{t("display")}</legend>
                           <div className="flex max-w-full min-w-0 items-center gap-2 lg:h-7 lg:gap-1">
                             <Checkbox
                               id="surname-input"
@@ -251,7 +258,7 @@ export function FamilyTree() {
                               checked={displaySurname}
                             />
                             <Label htmlFor="surname-input">
-                              Afficher le nom de famille
+                              {t("showSurname")}
                             </Label>
                           </div>
                           <div className="flex max-w-full min-w-0 items-center gap-2 lg:h-7 lg:gap-1">
@@ -265,7 +272,7 @@ export function FamilyTree() {
                               checked={displayOnlyMaidenSurname}
                             />
                             <Label htmlFor="maiden-input">
-                              N&apos;afficher que le nom de jeune fille
+                              {t("maidenOnly")}
                             </Label>
                           </div>
                           <div className="flex max-w-full min-w-0 items-center gap-2 lg:h-7 lg:gap-1">
@@ -277,7 +284,7 @@ export function FamilyTree() {
                               checked={displayBirthdate}
                             />
                             <Label htmlFor="birthdate-input">
-                              Afficher l&apos;année de naissance
+                              {t("showBirthYear")}
                             </Label>
                           </div>
                         </fieldset>
@@ -298,7 +305,7 @@ export function FamilyTree() {
                           }}
                         />
                         <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:items-center sm:gap-2 lg:gap-2">
-                          <Label htmlFor="query-input">Recherche:</Label>
+                          <Label htmlFor="query-input">{t("search")}</Label>
                           <div className="flex min-w-0 items-center gap-1 sm:flex-1">
                             <Input
                               className="h-9 min-w-0 border-amber-900/20 bg-white/60 lg:h-8"
@@ -335,13 +342,13 @@ export function FamilyTree() {
                   >
                     {search?.hasQuery ? (
                       search.matchCount === 0 ? (
-                        "Aucune personne trouvée."
+                        t("noMatches")
                       ) : (
                         <>
-                          {`${search.matchCount} personne${search.matchCount > 1 ? "s" : ""} trouvée${search.matchCount > 1 ? "s" : ""} et entourée${search.matchCount > 1 ? "s" : ""}`}
+                          {t("matches", { count: search.matchCount })}
                           {". "}
                           <span id="tree-search-branches-help">
-                            Branches dépliées pendant la recherche.
+                            {t("searchExpanded")}
                           </span>
                         </>
                       )
@@ -357,7 +364,7 @@ export function FamilyTree() {
                       className="border-amber-900/20 bg-white/60 text-xs not-disabled:hover:bg-amber-900/10"
                       onClick={() => setQuery("")}
                     >
-                      Effacer
+                      {common("clear")}
                     </Button>
                   )}
                 </div>
@@ -388,7 +395,7 @@ export function FamilyTree() {
                 >
                   {search?.hasQuery && search.matchCount === 0 ? (
                     <p className="max-w-xs text-center text-amber-950">
-                      Essayez un autre prénom ou nom de famille.
+                      {t("tryNames")}
                     </p>
                   ) : (
                     <Tree

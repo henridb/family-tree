@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
+import { useLocale } from "next-intl";
 import { CircleHelp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -23,6 +24,7 @@ export function ControlHelp({
   label: string;
   children: ReactNode;
 }) {
+  const locale = useLocale();
   const [openedBy, setOpenedBy] = useState<"hover" | "focus" | "press" | null>(
     null,
   );
@@ -81,7 +83,7 @@ export function ControlHelp({
       document.removeEventListener("pointerdown", dismissOutside, true);
       document.removeEventListener("keydown", dismissOnEscape);
     };
-  }, [open]);
+  }, [open, locale]);
 
   /** Cancel pending dismissal and open on hover without replacing a focus or press opening. */
   function enter() {

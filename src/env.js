@@ -12,6 +12,7 @@ export const env = createEnv({
    * isn't built with invalid env vars.
    */
   server: {
+    DEFAULT_LOCALE: z.string().optional(),
     OWNER_PASSWORD_HASH: z
       .string()
       .regex(/^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$/)
@@ -48,6 +49,7 @@ export const env = createEnv({
    * middlewares) or client-side so we need to destruct manually.
    */
   runtimeEnv: {
+    DEFAULT_LOCALE: process.env.DEFAULT_LOCALE,
     OWNER_PASSWORD_HASH: process.env.OWNER_PASSWORD_HASH,
     FAMILY_INSTANCE_ID: process.env.FAMILY_INSTANCE_ID,
     FAMILY_DATA_FILE: process.env.FAMILY_DATA_FILE,

@@ -26,6 +26,7 @@ const documentShape = z.strictObject({
   revision: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),
   title: z.string().refine((title) => title.trim().length > 0, {
     message: "The family title must not be blank.",
+    params: { messageKey: "title" },
   }),
   rootPersonId: familyIdSchema.nullable(),
   people: z.array(familyPersonSchema),
@@ -49,6 +50,7 @@ export const familyDocumentSchema = documentShape.superRefine(
           code: "custom",
           path: ["people", index, "id"],
           message: `Duplicate person ID: ${person.id}`,
+          params: { messageKey: "duplicatePerson", id: person.id },
         });
       }
       people.add(person.id);
@@ -61,6 +63,7 @@ export const familyDocumentSchema = documentShape.superRefine(
           code: "custom",
           path,
           message: `Unknown person ID: ${id}`,
+          params: { messageKey: "unknownPerson", id },
         });
       }
     }
@@ -82,6 +85,7 @@ export const familyDocumentSchema = documentShape.superRefine(
           code: "custom",
           path: [...path, "id"],
           message: `Duplicate partnership ID: ${partnership.id}`,
+          params: { messageKey: "duplicateUnion", id: partnership.id },
         });
       }
       partnerships.add(partnership.id);
@@ -91,6 +95,7 @@ export const familyDocumentSchema = documentShape.superRefine(
           code: "custom",
           path: [...path, "personIds"],
           message: "A partnership must contain two different people.",
+          params: { messageKey: "differentPeople" },
         });
       }
       const pair = JSON.stringify([...partnership.personIds].sort());
@@ -99,6 +104,7 @@ export const familyDocumentSchema = documentShape.superRefine(
           code: "custom",
           path: [...path, "personIds"],
           message: "The same two people must share one partnership record.",
+          params: { messageKey: "duplicatePair" },
         });
       }
       pairs.add(pair);
@@ -115,6 +121,7 @@ export const familyDocumentSchema = documentShape.superRefine(
             code: "custom",
             path: childPath,
             message: `Duplicate child ID: ${id}`,
+            params: { messageKey: "duplicateChild", id },
           });
         }
         children.add(id);
@@ -123,6 +130,7 @@ export const familyDocumentSchema = documentShape.superRefine(
             code: "custom",
             path: childPath,
             message: "A person cannot be their own parent.",
+            params: { messageKey: "selfParent" },
           });
         }
         const previous = parentPartnerships.get(id);
@@ -131,6 +139,7 @@ export const familyDocumentSchema = documentShape.superRefine(
             code: "custom",
             path: childPath,
             message: "Version 1 supports one parental partnership per child.",
+            params: { messageKey: "multipleParents" },
           });
         }
         parentPartnerships.set(id, partnership.id);
@@ -163,6 +172,7 @@ export const familyDocumentSchema = documentShape.superRefine(
         path: ["partnerships"],
         message:
           "Parent-child relationships must not contain an ancestry cycle.",
+        params: { messageKey: "cycle" },
       });
     }
   },

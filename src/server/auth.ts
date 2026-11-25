@@ -1,9 +1,9 @@
+import { UserFacingError } from "@/server/user-facing-error";
 import "server-only";
 
 import { createHash, scrypt, timingSafeEqual } from "node:crypto";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
-import { TRPCError } from "@trpc/server";
 
 import { env } from "@/env";
 import { reserveLoginAttempt } from "@/server/login-rate-limit";
@@ -183,9 +183,6 @@ export async function checkLoginRateLimit() {
   // A site-wide budget avoids trusting spoofable client IP headers.
   const attempts = await reserveLoginAttempt(loginWindowMs, maxLoginAttempts);
   if (attempts > maxLoginAttempts) {
-    throw new TRPCError({
-      code: "TOO_MANY_REQUESTS",
-      message: "Trop de tentatives. Réessayez dans une minute.",
-    });
+    throw new UserFacingError("TOO_MANY_REQUESTS", "rateLimit");
   }
 }

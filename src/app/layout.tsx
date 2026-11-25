@@ -1,33 +1,42 @@
 import "@/styles/globals.css";
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { TRPCReactProvider } from "@/trpc/react";
 
-export const metadata: Metadata = {
-  title: "Arbre familial",
-  description: "Créez et explorez votre arbre familial",
-  icons: [{ rel: "icon", url: "/favicon.svg", type: "image/svg+xml" }],
-  manifest: "/site.webmanifest",
-};
+/** Keep document metadata in the same language as the rendered interface. */
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("metadata");
+  return {
+    title: t("title"),
+    description: t("description"),
+    icons: [{ rel: "icon", url: "/favicon.svg", type: "image/svg+xml" }],
+    manifest: "/site.webmanifest",
+  };
+}
 
 const geist = Geist({
   subsets: ["latin"],
   variable: "--font-geist-sans",
 });
 
-/** Wrap every page in the French document, shared typography and tRPC/query providers. */
-export default function RootLayout({
+/** Provide request-specific translations without keying or remounting application state. */
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const locale = await getLocale();
   return (
-    <html lang="fr" className={`${geist.variable}`}>
+    <html lang={locale} className={`${geist.variable}`}>
       <meta
         name="viewport"
         content="width=device-width, initial-scale=1, minimum-scale=1"
       />
       <body className="paper-background flex flex-col justify-center">
-        <TRPCReactProvider>{children}</TRPCReactProvider>
+        <NextIntlClientProvider>
+          <TRPCReactProvider>{children}</TRPCReactProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

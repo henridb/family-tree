@@ -1,4 +1,5 @@
-import { TRPCError } from "@trpc/server";
+import { UserFacingError } from "@/server/user-facing-error";
+
 import { z } from "zod";
 
 import {
@@ -15,10 +16,7 @@ export const loginRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await checkLoginRateLimit();
       if (!(await verifyPassword(input))) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Mauvais mot de passe.",
-        });
+        throw new UserFacingError("UNAUTHORIZED", "wrongPassword");
       }
       await startSession(ctx.session);
       return { authenticated: true };

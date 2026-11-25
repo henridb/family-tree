@@ -1,3 +1,4 @@
+import { useLocale, useTranslations } from "next-intl";
 import { Card } from "@/components/ui/card";
 import {
   Dialog,
@@ -10,11 +11,7 @@ import { memo, type KeyboardEvent, type MouseEvent } from "react";
 import { PartnershipConnectors } from "./_components/partnership-connectors";
 import { SearchMatchText } from "./_components/search-match-text";
 import { type human, type person } from "@/types/family";
-import {
-  currentPartner,
-  generationLabel,
-  type FamilyContext,
-} from "@/lib/family-context";
+import { currentPartner, type FamilyContext } from "@/lib/family-context";
 import { formatBirthDate, formatBirthYear } from "@/lib/format-birth-date";
 import { personElementId, partnershipElementId } from "@/lib/family-identities";
 
@@ -57,6 +54,7 @@ export function Tree({
   displaySurname: boolean;
   displayBirthdate: boolean;
 }) {
+  const t = useTranslations("person");
   // idea: options to show ascendance and/or descendence, for now I only focus on ascendence
   // idea: instead of pruning the tree, one could highlight the path from the
   // searched person to self (this means having an option to mark self !) if
@@ -185,7 +183,13 @@ export function Tree({
                 partner.id,
                 "descendants",
               )}
-              aria-label={`${isCollapsed(partner.id) ? "Afficher" : "Masquer"} les descendants de ${person.name} ${person.surname} et ${partner.name} ${partner.surname}`}
+              aria-label={t(
+                isCollapsed(partner.id) ? "showDescendants" : "hideDescendants",
+                {
+                  first: `${person.name} ${person.surname}`,
+                  second: `${partner.name} ${partner.surname}`,
+                },
+              )}
               onClick={(event) => onToggleBranch(person.id, partner.id, event)}
               className="branch-toggle absolute top-1/2 left-1/2 z-100 flex size-6 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-amber-50 font-semibold text-amber-950 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -302,8 +306,13 @@ export const PersonCard = memo(function PersonCard({
   displayOnlyMaidenSurname: boolean;
   displayBirthdate: boolean;
 }) {
+  const t = useTranslations("person");
+  const locale = useLocale();
   const generation = context.generation;
-  const description = generationLabel(context);
+  const description = t("generationDescription", {
+    generation: context.generation + 1,
+    name: `${context.path[0]!.person.name} ${context.path[0]!.person.surname}`,
+  });
   const previousGenerations = context.path.slice(0, -1);
   const onlyMaidenSurname =
     displayOnlyMaidenSurname || partnerSurname === undefined;
@@ -340,11 +349,12 @@ export const PersonCard = memo(function PersonCard({
                 title={description}
                 className="absolute top-1 right-2 rounded bg-amber-100 px-1 text-[0.65em] text-amber-900"
               >
-                Gén. {generation + 1}
+                {t("generationShort", { generation: generation + 1 })}
               </span>
             )}
             <span className="sr-only">
-              {person.match && "Résultat de recherche. "}Voir la fiche de{" "}
+              {person.match && t("searchResult")}
+              {t("viewDetails")}{" "}
             </span>
             <span
               className={
@@ -368,7 +378,7 @@ export const PersonCard = memo(function PersonCard({
                 {displaySurname && !onlyMaidenSurname ? (
                   person.sex === "female" ? (
                     <>
-                      {"(née "}
+                      {t("bornPrefix")}
                       <SearchMatchText
                         text={person.surname}
                         ranges={highlights?.surname}
@@ -399,7 +409,7 @@ export const PersonCard = memo(function PersonCard({
                   title={description}
                   className="rounded bg-amber-100 px-1 text-[10px] text-amber-900"
                 >
-                  Gén. {generation + 1}
+                  {t("generationShort", { generation: generation + 1 })}
                 </span>
               )}
             </span>
@@ -413,22 +423,24 @@ export const PersonCard = memo(function PersonCard({
         </DialogTitle>
         <p className="text-xs text-amber-900">{description}</p>
         <div className="person-details">
-          <span>Nom{person.sex === "female" && " de jeune fille"}:</span>
+          <span>
+            {t(person.sex === "female" ? "birthSurnameLabel" : "surnameLabel")}
+          </span>
           <span>
             <SearchMatchText
               text={person.surname}
               ranges={highlights?.surname}
             />
           </span>
-          <span>Prénom:</span>
+          <span>{t("firstNameLabel")}</span>
           <span>
             <SearchMatchText text={person.name} ranges={highlights?.name} />
           </span>
-          <span>Date de naissance:</span>{" "}
-          <span>{formatBirthDate(person.birthdate)}</span>
+          <span>{t("birthDateLabel")}</span>{" "}
+          <span>{formatBirthDate(person.birthdate, locale)}</span>
           {partnerName && partnerSurname && (
             <>
-              <span>{person.sex === "male" ? "Femme" : "Mari"}:</span>{" "}
+              <span>{person.sex === "male" ? t("wife") : t("husband")}:</span>{" "}
               <span>
                 {partnerName} {partnerSurname}
               </span>
@@ -438,18 +450,17 @@ export const PersonCard = memo(function PersonCard({
         {previousGenerations.length > 0 && (
           <section className="mt-2 min-w-0 border-t border-amber-900/15 pt-3">
             <h3 className="text-sm font-semibold text-amber-950">
-              Générations précédentes
+              {t("previousGenerations")}
             </h3>
             <ol className="mt-2 list-decimal space-y-2 pl-5 text-xs leading-5 wrap-anywhere text-amber-900">
               {previousGenerations.map((step) => (
                 <li key={step.person.id}>
-                  {step.person.name} {step.person.surname}
-                  {step.partner && (
-                    <>
-                      {" et "}
-                      {step.partner.name} {step.partner.surname}
-                    </>
-                  )}
+                  {step.partner
+                    ? t("couple", {
+                        first: `${step.person.name} ${step.person.surname}`,
+                        second: `${step.partner.name} ${step.partner.surname}`,
+                      })
+                    : `${step.person.name} ${step.person.surname}`}
                 </li>
               ))}
             </ol>

@@ -43,9 +43,9 @@ test("birth years and details are identical across timezones", () => {
   const script = `
     import { birthDate } from ${JSON.stringify(moduleUrl)};
     import { formatBirthDate, formatBirthYear } from ${JSON.stringify(formatterUrl)};
-    console.log(JSON.stringify(["1910", "1956-02", "2000-01-01"].map(source => {
+    console.log(JSON.stringify(["1910", "1956-02", "2000-01-31"].map(source => {
       const value = birthDate(source);
-      return [formatBirthYear(value), formatBirthDate(value)];
+      return [formatBirthYear(value), formatBirthDate(value), formatBirthDate(value, "en-US")];
     })));
   `;
   for (const timezone of ["UTC", "America/Los_Angeles", "Pacific/Auckland"]) {
@@ -57,9 +57,9 @@ test("birth years and details are identical across timezones", () => {
     assert.deepEqual(
       JSON.parse(output.toString()),
       [
-        ["1910", "1910"],
-        ["1956", "02/1956"],
-        ["2000", "01/01/2000"],
+        ["1910", "1910", "1910"],
+        ["1956", "02/1956", "02/1956"],
+        ["2000", "31/01/2000", "01/31/2000"],
       ],
       timezone,
     );

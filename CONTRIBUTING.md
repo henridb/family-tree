@@ -71,6 +71,44 @@ Focused scripts such as `test:family-document`, `test:family-store`,
 are available in `package.json`. `test:auth` builds the application and runs the
 HTTP authentication and environment suites.
 
+## Add or update a language
+
+Interface messages live in `messages/fr.ts` and `messages/en.ts`. Use
+namespaced keys and complete messages with named interpolation arguments. Keep
+plural and ordinal rules in the catalog; languages can use different plural
+cases. Include tooltips, screen-reader labels, confirmations, empty states and
+short error feedback. Family names and titles are user data, not translations.
+
+To add a language, add its locale and native name in `src/i18n/locales.ts`, add
+its catalog loader in `src/i18n/request.ts`, include its type in
+`src/i18n/types.d.ts`, and provide the same keys and interpolation arguments as
+the French catalog. Follow the English catalog's `as const` and `satisfies`
+checks: they retain literal message types and check keys and argument types
+against French. The shared selector reads this configuration. Extend the catalog
+checks in `tests/i18n.test.mjs` with the new
+catalog. `npm run test:translations` checks key parity, message syntax,
+interpolation, locale resolution and formatting. The full `npm test` run also
+covers HTTP rendering, metadata and error identifiers.
+
+Use `useTranslations("viewer")` in client components and
+`getTranslations("metadata")` in async server components, choosing the relevant
+namespace. Keys and interpolation arguments have autocomplete and compiler
+checks; for example, `t("matches", {count: 2})` requires a numeric `count`.
+`npm run typecheck` also runs the compile-time contracts in
+`tests/types/translations.ts`.
+
+Keep feedback in state as message keys rather than translated
+sentences, so existing feedback changes language too. Avoid locale-dependent
+component keys or full-page navigation when switching languages: drafts,
+selection, search, zoom and collapsed branches must survive. Keep shared document
+and projection helpers independent of React and request context.
+
+Birth-date inputs retain `YYYY`, `YYYY-MM` and `YYYY-MM-DD` formats. Display
+formatting may change order but must preserve known precision and use calendar
+values without timezone shifts. Name matching and relationship rules are
+independent of interface language. CLI prompts and translated documentation are
+outside the first multilingual release.
+
 ## Find your way around
 
 | Location                   | Purpose                                                            |

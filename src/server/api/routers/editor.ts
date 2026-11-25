@@ -1,3 +1,4 @@
+import { UserFacingError } from "@/server/user-facing-error";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -39,30 +40,15 @@ async function operation<T>(run: () => Promise<T>): Promise<T> {
   } catch (error) {
     if (error instanceof TRPCError) throw error;
     if (error instanceof FamilyStoreConflictError)
-      throw new TRPCError({
-        code: "CONFLICT",
-        message:
-          "L’arbre a changé. Votre brouillon est conservé ; rechargez la version enregistrée avant de recommencer.",
-      });
+      throw new UserFacingError("CONFLICT", "conflict");
     if (error instanceof z.ZodError || error instanceof FamilyProjectionError)
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message:
-          "Le document ou la vue choisie est invalide. Vérifiez les personnes, les liens et la personne de départ.",
-      });
+      throw new UserFacingError("BAD_REQUEST", "invalidDocument");
     if (
       error instanceof FamilyStoreError &&
       error.code === "REVISION_NOT_FOUND"
     )
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Cette version n’est plus conservée.",
-      });
-    throw new TRPCError({
-      code: "SERVICE_UNAVAILABLE",
-      message:
-        "L’opération n’a pas pu être confirmée. Rechargez la version enregistrée avant de réessayer.",
-    });
+      throw new UserFacingError("NOT_FOUND", "missingRevision");
+    throw new UserFacingError("SERVICE_UNAVAILABLE", "unconfirmed");
   }
 }
 
@@ -78,22 +64,12 @@ export const editorRouter = createTRPCRouter({
     .input(z.string().min(1).max(1024))
     .mutation(async ({ ctx, input }) => {
       if (!env.OWNER_PASSWORD_HASH)
-        throw new TRPCError({
-          code: "PRECONDITION_FAILED",
-          message: "L’accès propriétaire n’est pas configuré.",
-        });
+        throw new UserFacingError("PRECONDITION_FAILED", "ownerNotConfigured");
       await checkLoginRateLimit();
       if (!(await verifyPassword(input, env.OWNER_PASSWORD_HASH)))
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Mauvais mot de passe propriétaire.",
-        });
+        throw new UserFacingError("UNAUTHORIZED", "wrongOwnerPassword");
       if (await verifyPassword(input))
-        throw new TRPCError({
-          code: "PRECONDITION_FAILED",
-          message:
-            "Le mot de passe propriétaire doit être différent du mot de passe partagé.",
-        });
+        throw new UserFacingError("PRECONDITION_FAILED", "samePassword");
       await startOwnerSession(ctx.ownerSession);
       return { authenticated: true };
     }),

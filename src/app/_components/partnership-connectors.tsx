@@ -1,5 +1,6 @@
 import { useLayoutEffect, useState } from "react";
 import Xarrow from "react-xarrows";
+import { useLocale } from "next-intl";
 import { personElementId } from "@/lib/family-identities";
 import type { person } from "@/types/family";
 
@@ -27,6 +28,7 @@ export function PartnershipConnectors({
   displayOnlyMaidenSurname: boolean;
   displayBirthdate: boolean;
 }) {
+  const locale = useLocale();
   const [geometry, setGeometry] = useState<{
     bendDistance: number;
     startOffset: number;
@@ -58,6 +60,7 @@ export function PartnershipConnectors({
     displaySurname,
     displayOnlyMaidenSurname,
     displayBirthdate,
+    locale,
   ]);
 
   if (!geometry) return null;

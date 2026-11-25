@@ -1,3 +1,4 @@
+import { UserFacingError } from "@/server/user-facing-error";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import { projectFamilyDocument } from "@/lib/family-projection";
@@ -15,18 +16,12 @@ export const personRouter = createTRPCRouter({
     try {
       const document = await readFamilyDocument();
       if (document === null)
-        throw new TRPCError({
-          code: "PRECONDITION_FAILED",
-          message: "Cet arbre n’est pas encore configuré.",
-        });
+        throw new UserFacingError("PRECONDITION_FAILED", "treeNotConfigured");
       return projectFamilyDocument(document);
     } catch (cause) {
       if (cause instanceof TRPCError) throw cause;
       // Stored validation errors may contain private fields: keep them off the wire.
-      throw new TRPCError({
-        code: "SERVICE_UNAVAILABLE",
-        message: "Impossible de charger l’arbre. Réessayez plus tard.",
-      });
+      throw new UserFacingError("SERVICE_UNAVAILABLE", "treeUnavailable");
     }
   }),
 });

@@ -7,8 +7,9 @@ export const fieldStyle = "flex min-w-0 flex-col gap-1 text-sm";
 /** Join a person's given and family names, falling back to Sans nom when both are blank. */
 export function personLabel(
   person: Pick<FamilyPersonInput, "name" | "surname">,
+  unnamed = "Sans nom",
 ) {
-  return `${person.name} ${person.surname}`.trim() || "Sans nom";
+  return `${person.name} ${person.surname}`.trim() || unnamed;
 }
 
 /** Generate a permanent editor ID by prefixing a UUID stripped of hyphens. */
@@ -35,10 +36,13 @@ export function move<T>(values: T[], index: number, direction: number) {
  * Build person-selection options with permanent IDs, names and known birth
  * dates or ? for unknown dates.
  */
-export function personOptions(people: FamilyPersonInput[]) {
+export function personOptions(
+  people: FamilyPersonInput[],
+  unnamed = "Sans nom",
+) {
   return people.map((p) => (
     <option key={p.id} value={p.id}>
-      {personLabel(p)} ({p.birthdate ?? "?"})
+      {personLabel(p, unnamed)} ({p.birthdate ?? "?"})
     </option>
   ));
 }

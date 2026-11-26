@@ -14,7 +14,13 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("title"),
     description: t("description"),
-    icons: [{ rel: "icon", url: "/favicon.svg", type: "image/svg+xml" }],
+    icons: {
+      icon: [
+        { url: "/favicon.ico", sizes: "16x16 32x32 48x48 256x256" },
+        { url: "/favicon.svg", type: "image/svg+xml", sizes: "any" },
+      ],
+      apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+    },
     manifest: "/site.webmanifest",
   };
 }

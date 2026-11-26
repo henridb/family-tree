@@ -156,5 +156,6 @@ uses a 1440×900 viewport; the compact mobile screenshot uses 390×844. Select
 **Vue compacte** on mobile. Save PNGs in `docs/images/` and keep personal records,
 browser profiles and hosting settings out of captures.
 
-The logo and favicon are SVG assets in `public/`; keep their tree silhouette and
-brown/beige palette consistent.
+The canonical artwork is `public/logo.svg`; `public/favicon.svg` uses the same
+tree. PNG and ICO exports provide browser and mobile icons. Keep all sizes in
+sync when changing the artwork, including the Apple touch icon and web manifest.

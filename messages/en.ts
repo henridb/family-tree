@@ -10,6 +10,7 @@ const messages = {
     unnamed: "Unnamed",
     and: "and",
     clear: "Clear",
+    close: "Close",
   },
   auth: {
     viewerTitle: "Access the family tree",

@@ -1,38 +1,39 @@
-"use client"
+"use client";
 
-import type * as React from "react"
-import { useSyncExternalStore } from "react"
-import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { XIcon } from "lucide-react"
+import type * as React from "react";
+import { useSyncExternalStore } from "react";
+import { useTranslations } from "next-intl";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { XIcon } from "lucide-react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 /** Provide the Radix dialog's open state and accessibility context. */
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
-  return <DialogPrimitive.Root data-slot="dialog" {...props} />
+  return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
 /** Render the control that opens its surrounding dialog. */
 function DialogTrigger({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
-  return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
+  return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
 }
 
 /** Mount dialog content through the Radix portal. */
 function DialogPortal({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
-  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
+  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
 }
 
 /** Render a control that closes its surrounding dialog. */
 function DialogClose({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Close>) {
-  return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
+  return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
 /** Render the dialog's fixed, dimmed backdrop with open/close transitions. */
@@ -45,35 +46,35 @@ function DialogOverlay({
       data-slot="dialog-overlay"
       className={cn(
         "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-120 bg-black/20 backdrop-blur-sm",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 /** Subscribe to visual viewport resizing and scrolling, returning a cleanup function. */
 function subscribeViewport(onChange: () => void) {
-  const viewport = window.visualViewport
-  viewport?.addEventListener("resize", onChange)
-  viewport?.addEventListener("scroll", onChange)
+  const viewport = window.visualViewport;
+  viewport?.addEventListener("resize", onChange);
+  viewport?.addEventListener("scroll", onChange);
   return () => {
-    viewport?.removeEventListener("resize", onChange)
-    viewport?.removeEventListener("scroll", onChange)
-  }
+    viewport?.removeEventListener("resize", onChange);
+    viewport?.removeEventListener("scroll", onChange);
+  };
 }
 
 /** Serialize visual viewport bounds into a stable snapshot, or return null when unsupported. */
 function viewportSnapshot() {
-  const viewport = window.visualViewport
+  const viewport = window.visualViewport;
   return viewport
     ? [
         viewport.offsetLeft,
         viewport.offsetTop,
         viewport.width,
-        viewport.height
+        viewport.height,
       ].join(",")
-    : null
+    : null;
 }
 
 /**
@@ -88,10 +89,10 @@ function DialogViewport({ children }: { children: React.ReactNode }) {
   const snapshot = useSyncExternalStore(
     subscribeViewport,
     viewportSnapshot,
-    () => null
-  )
+    () => null,
+  );
   const [left = 0, top = 0, width = 0, height = 0] =
-    snapshot?.split(",").map(Number) ?? []
+    snapshot?.split(",").map(Number) ?? [];
   return (
     <div
       data-slot="dialog-viewport"
@@ -100,7 +101,7 @@ function DialogViewport({ children }: { children: React.ReactNode }) {
     >
       {children}
     </div>
-  )
+  );
 }
 
 /**
@@ -112,6 +113,7 @@ function DialogContent({
   children,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content>) {
+  const t = useTranslations("common");
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
@@ -120,13 +122,13 @@ function DialogContent({
           data-slot="dialog-content"
           className={cn(
             "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 pointer-events-auto relative grid max-h-full w-full max-w-lg gap-4 overflow-y-auto rounded-lg border p-6 shadow-lg duration-200",
-            className
+            className,
           )}
           {...props}
         >
           {children}
           <DialogPrimitive.Close
-            aria-label="Fermer"
+            aria-label={t("close")}
             className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 cursor-pointer rounded-xs opacity-70 transition-opacity not-disabled:hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
           >
             <XIcon aria-hidden="true" />
@@ -134,7 +136,7 @@ function DialogContent({
         </DialogPrimitive.Content>
       </DialogViewport>
     </DialogPortal>
-  )
+  );
 }
 
 /** Group a dialog's heading content with responsive text alignment. */
@@ -145,7 +147,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
       className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
       {...props}
     />
-  )
+  );
 }
 
 /**
@@ -158,11 +160,11 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="dialog-footer"
       className={cn(
         "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 /** Render the styled Radix title used as the dialog's accessible name. */
@@ -176,7 +178,7 @@ function DialogTitle({
       className={cn("text-lg leading-none font-semibold", className)}
       {...props}
     />
-  )
+  );
 }
 
 /** Render the styled Radix description associated with the dialog. */
@@ -190,7 +192,7 @@ function DialogDescription({
       className={cn("text-muted-foreground text-sm", className)}
       {...props}
     />
-  )
+  );
 }
 
 export {
@@ -203,5 +205,5 @@ export {
   DialogOverlay,
   DialogPortal,
   DialogTitle,
-  DialogTrigger
-}
+  DialogTrigger,
+};

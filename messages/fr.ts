@@ -5,6 +5,7 @@ const messages = {
     unnamed: "Sans nom",
     and: "et",
     clear: "Effacer",
+    close: "Fermer",
   },
   auth: {
     viewerTitle: "Accès à l’arbre généalogique",

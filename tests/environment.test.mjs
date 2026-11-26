@@ -7,6 +7,7 @@ const fakeEnvironment = {
   ...process.env,
   NODE_ENV: "production",
   SKIP_ENV_VALIDATION: "",
+  LANGUAGE_MODE: "",
   VERCEL: "",
   DATABASE_URL: "file:./test-only.sqlite",
   PASSWORD_HASH: `scrypt:${"0".repeat(32)}:${"0".repeat(128)}`,
@@ -17,6 +18,14 @@ const fakeEnvironment = {
 };
 
 for (const { label, variables, missing } of [
+  { label: "language choice", variables: { LANGUAGE_MODE: "choice" } },
+  { label: "fixed French", variables: { LANGUAGE_MODE: "fr-FR" } },
+  { label: "fixed English", variables: { LANGUAGE_MODE: "en-US" } },
+  {
+    label: "unsupported language mode",
+    variables: { LANGUAGE_MODE: "fr" },
+    missing: ["LANGUAGE_MODE"],
+  },
   {
     label: "optional owner credential",
     variables: {

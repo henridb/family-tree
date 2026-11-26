@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { getRequestConfig } from "next-intl/server";
+import { env } from "@/env";
 import { localeCookie, resolveLocale } from "./locales";
 import type { AppLocale } from "./locales";
 import type french from "../../messages/fr";
@@ -14,7 +15,8 @@ const catalogs = {
 export default getRequestConfig(async () => {
   const locale = resolveLocale(
     (await cookies()).get(localeCookie)?.value,
-    process.env.DEFAULT_LOCALE,
+    env.DEFAULT_LOCALE,
+    env.LANGUAGE_MODE,
   );
   const messages = await catalogs[locale]();
   return { locale, messages, timeZone: "UTC" };

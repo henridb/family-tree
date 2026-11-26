@@ -4,8 +4,11 @@ Family Tree is a Next.js App Router application using React, TypeScript, tRPC,
 React Query and Zod. One installation serves one family document. The interface
 supports French (France) and English (US).
 
-Locale resolution is request-scoped: a validated `family-tree-locale` cookie
-takes precedence over `DEFAULT_LOCALE`, with `fr-FR` as the fallback. `next-intl`
+Locale resolution is request-scoped. `LANGUAGE_MODE=fr-FR` or `en-US` fixes the
+language, ignores saved preferences, hides every language selector and rejects
+language-change actions. The default `LANGUAGE_MODE=choice` allows a validated
+`family-tree-locale` cookie to take precedence over `DEFAULT_LOCALE`, with `fr-FR`
+as the fallback. A client context receives only whether choice is enabled. `next-intl`
 loads the selected local catalog and supplies the same locale to server and
 client rendering, metadata and document language. Language changes use a Server
 Action and preserve mounted editor/viewer state. They neither change routes nor

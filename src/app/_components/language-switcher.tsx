@@ -4,6 +4,8 @@ import { useId, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { setLocale } from "@/i18n/actions";
 import { locales, localeNames } from "@/i18n/locales";
+import { useLanguageChoice } from "@/i18n/language-choice";
+import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -14,14 +16,16 @@ import {
 } from "@/components/ui/select";
 
 /** Switch language without replacing the editor or viewer's local state. */
-export function LanguageSwitcher() {
+export function LanguageSwitcher({ className }: { className?: string }) {
+  const enabled = useLanguageChoice();
   const id = useId();
   const locale = useLocale();
   const t = useTranslations("language");
   const [pending, startTransition] = useTransition();
   const [failed, setFailed] = useState(false);
+  if (!enabled) return null;
   return (
-    <div className="space-y-1" data-language-switcher>
+    <div className={cn("space-y-1", className)} data-language-switcher>
       <div className="flex flex-wrap items-center gap-2">
         <Label htmlFor={id}>{t("label")}</Label>
         <Select

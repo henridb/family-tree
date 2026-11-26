@@ -189,6 +189,7 @@ before(async () => {
     NODE_ENV: "production",
     NEXT_TELEMETRY_DISABLED: "1",
     DEFAULT_LOCALE: useRedis ? "en-US" : "fr-FR",
+    LANGUAGE_MODE: "choice",
     // The Vercel path must work without access to any SQLite file.
     DATABASE_URL: useRedis
       ? "file:/unavailable-family-fixture/db.sqlite"

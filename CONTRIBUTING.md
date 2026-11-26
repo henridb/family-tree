@@ -79,6 +79,11 @@ plural and ordinal rules in the catalog; languages can use different plural
 cases. Include tooltips, screen-reader labels, confirmations, empty states and
 short error feedback. Family names and titles are user data, not translations.
 
+`LANGUAGE_MODE` supports `choice` (the default) or a fixed locale. Fixed modes
+must override existing locale cookies and reject language-change actions, and
+selectors must be absent on every screen. Keep the supported modes derived from
+the locale list so adding a language also makes it available as a fixed mode.
+
 To add a language, add its locale and native name in `src/i18n/locales.ts`, add
 its catalog loader in `src/i18n/request.ts`, include its type in
 `src/i18n/types.d.ts`, and provide the same keys and interpolation arguments as

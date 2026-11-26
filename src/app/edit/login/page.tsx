@@ -16,9 +16,7 @@ export default async function OwnerLoginPage() {
   if (!env.OWNER_PASSWORD_HASH)
     return (
       <main className="mx-auto max-w-lg space-y-4 p-8">
-        <div className="flex justify-end">
-          <LanguageSwitcher />
-        </div>
+        <LanguageSwitcher className="ml-auto w-fit" />
         <h1 className="text-xl font-semibold">{t("auth.disabledTitle")}</h1>
         <p className="mt-4">{t("auth.disabledIntro")}</p>
         <Link className="mt-4 inline-block underline" href="/">

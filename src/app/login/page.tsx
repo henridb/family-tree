@@ -44,9 +44,7 @@ export default function LoginPage() {
         className="flex w-full max-w-md flex-col rounded-2xl border border-amber-900/15 bg-white/85 p-6 shadow-sm sm:p-8"
         onSubmit={handleForm}
       >
-        <div className="flex justify-end">
-          <LanguageSwitcher />
-        </div>
+        <LanguageSwitcher className="ml-auto w-fit" />
         <div className="mb-5 flex items-center gap-3">
           <Image src="/logo.svg" alt="" width={48} height={48} />
           <p className="font-semibold tracking-wide">Family Tree</p>

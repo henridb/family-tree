@@ -82,6 +82,18 @@ test("visitor choice and installation defaults fall back independently", () => {
   assert.equal(resolveLocale("fr-FR", "en-US"), "fr-FR");
 });
 
+test("fixed languages override saved preferences and the choice-mode default", () => {
+  for (const [mode, other] of [
+    ["fr-FR", "en-US"],
+    ["en-US", "fr-FR"],
+  ]) {
+    assert.equal(resolveLocale(other, other, mode), mode);
+    assert.equal(resolveLocale(undefined, other, mode), mode);
+    assert.equal(resolveLocale("unsupported", undefined, mode), mode);
+  }
+  assert.equal(resolveLocale("en-US", "fr-FR", "choice"), "en-US");
+});
+
 test("generation ordinals and counts follow each language", () => {
   checkTranslations(`
   const en = createTranslator({locale:"en-US", messages:catalogs.en});

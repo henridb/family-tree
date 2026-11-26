@@ -1,5 +1,7 @@
 export const locales = ["fr-FR", "en-US"] as const;
 export type AppLocale = (typeof locales)[number];
+export const languageModes = ["choice", ...locales] as const;
+export type LanguageMode = (typeof languageModes)[number];
 export const localeNames: Record<AppLocale, string> = {
   "fr-FR": "Français",
   "en-US": "English",
@@ -12,11 +14,13 @@ export function isLocale(value: unknown): value is AppLocale {
   return (locales as readonly unknown[]).includes(value);
 }
 
-/** Prefer an explicit visitor choice, then the installation default, then French. */
+/** Enforce a fixed language, otherwise prefer the visitor choice and installation default. */
 export function resolveLocale(
   choice?: string,
   installation?: string,
+  mode: LanguageMode = "choice",
 ): AppLocale {
+  if (mode !== "choice") return mode;
   return isLocale(choice)
     ? choice
     : isLocale(installation)

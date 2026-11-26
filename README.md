@@ -7,14 +7,23 @@
 Create a family tree, explore its branches, and share it with your family.
 Each installation has its own family, a password for visitors, and a separate
 owner password for editing. The interface is available in French (France) and
-English (US). Choose **Langue / Language** on the login screens, in the tree
-options, or in the editor header. Your choice is remembered in this browser.
+English (US). When language choice is enabled, use **Langue / Language** on the
+login screens, in the tree options, or in the editor header. Your choice is
+remembered in this browser.
 
-French is the default. Set `DEFAULT_LOCALE=en-US` in your local `.env` or hosted
-environment settings to change the installation default. A saved visitor
-preference takes precedence. Restart the local server or redeploy after changing
-this setting. Switching language preserves unsaved drafts and
-tree controls; family names, titles and saved records are kept as entered.
+Configure language in your local `.env` or hosted environment settings:
+
+| Setting                | Behavior                                                                    |
+| ---------------------- | --------------------------------------------------------------------------- |
+| `LANGUAGE_MODE=choice` | Offer the selector and remember each visitor's choice. This is the default. |
+| `LANGUAGE_MODE=fr-FR`  | Always use French and hide the selector.                                    |
+| `LANGUAGE_MODE=en-US`  | Always use English and hide the selector.                                   |
+
+In choice mode, `DEFAULT_LOCALE` sets the starting language (`fr-FR` by default,
+or `en-US`). A saved visitor preference takes precedence. Fixed-language modes
+ignore both this default and saved preferences. Restart the local server or
+redeploy after changing these settings. Switching language preserves unsaved
+drafts and tree controls; family names, titles and saved records are kept as entered.
 
 - Add people and relationships at your own pace, including incomplete dates.
 - Search names, open person details, and collapse branches.

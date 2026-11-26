@@ -1,5 +1,6 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
+import { languageModes } from "./i18n/locales.ts";
 
 const requiresRedis =
   process.env.VERCEL === "1" ||
@@ -12,6 +13,7 @@ export const env = createEnv({
    * isn't built with invalid env vars.
    */
   server: {
+    LANGUAGE_MODE: z.enum(languageModes).default("choice"),
     DEFAULT_LOCALE: z.string().optional(),
     OWNER_PASSWORD_HASH: z
       .string()
@@ -49,6 +51,7 @@ export const env = createEnv({
    * middlewares) or client-side so we need to destruct manually.
    */
   runtimeEnv: {
+    LANGUAGE_MODE: process.env.LANGUAGE_MODE,
     DEFAULT_LOCALE: process.env.DEFAULT_LOCALE,
     OWNER_PASSWORD_HASH: process.env.OWNER_PASSWORD_HASH,
     FAMILY_INSTANCE_ID: process.env.FAMILY_INSTANCE_ID,

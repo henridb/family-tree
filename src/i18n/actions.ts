@@ -1,11 +1,12 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { env } from "@/env";
 import { isLocale, localeCookie } from "./locales";
 
 /** Persist a validated preference without replacing mounted editor or viewer state. */
 export async function setLocale(value: string): Promise<boolean> {
-  if (!isLocale(value)) return false;
+  if (env.LANGUAGE_MODE !== "choice" || !isLocale(value)) return false;
   (await cookies()).set(localeCookie, value, {
     path: "/",
     sameSite: "lax",

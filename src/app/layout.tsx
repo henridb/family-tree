@@ -5,6 +5,8 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { TRPCReactProvider } from "@/trpc/react";
+import { LanguageChoiceProvider } from "@/i18n/language-choice";
+import { env } from "@/env";
 
 /** Keep document metadata in the same language as the rendered interface. */
 export async function generateMetadata(): Promise<Metadata> {
@@ -35,7 +37,9 @@ export default async function RootLayout({
       />
       <body className="paper-background flex flex-col justify-center">
         <NextIntlClientProvider>
-          <TRPCReactProvider>{children}</TRPCReactProvider>
+          <LanguageChoiceProvider enabled={env.LANGUAGE_MODE === "choice"}>
+            <TRPCReactProvider>{children}</TRPCReactProvider>
+          </LanguageChoiceProvider>
         </NextIntlClientProvider>
       </body>
     </html>

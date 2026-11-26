@@ -35,9 +35,7 @@ export function OwnerLogin() {
           if (!login.isPending) login.mutate(password);
         }}
       >
-        <div className="flex justify-end">
-          <LanguageSwitcher />
-        </div>
+        <LanguageSwitcher className="ml-auto w-fit" />
         <h1 className="text-2xl font-semibold">{t("auth.ownerTitle")}</h1>
         <p>{t("auth.ownerIntro")}</p>
         <Label htmlFor="owner-password">{t("auth.ownerPassword")}</Label>

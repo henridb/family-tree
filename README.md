@@ -6,7 +6,15 @@
 
 Create a family tree, explore its branches, and share it with your family.
 Each installation has its own family, a password for visitors, and a separate
-owner password for editing. The interface is currently in French.
+owner password for editing. The interface is available in French (France) and
+English (US). Choose **Langue / Language** on the login screens, in the tree
+options, or in the editor header. Your choice is remembered in this browser.
+
+French is the default. Set `DEFAULT_LOCALE=en-US` in your local `.env` or hosted
+environment settings to change the installation default. A saved visitor
+preference takes precedence. Restart the local server or redeploy after changing
+this setting. Switching language preserves unsaved drafts and
+tree controls; family names, titles and saved records are kept as entered.
 
 - Add people and relationships at your own pace, including incomplete dates.
 - Search names, open person details, and collapse branches.

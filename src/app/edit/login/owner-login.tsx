@@ -1,5 +1,9 @@
 "use client";
 
+import { LanguageSwitcher } from "../../_components/language-switcher";
+import { useErrorMessage } from "@/i18n/error-message";
+import { useTranslations } from "next-intl";
+
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -12,6 +16,8 @@ import { api } from "@/trpc/react";
  * successful authentication.
  */
 export function OwnerLogin() {
+  const t = useTranslations();
+  const errorMessage = useErrorMessage();
   const [password, setPassword] = useState("");
   const login = api.editor.login.useMutation({
     /** Clear the password and load a fresh editor page after the owner cookie is saved. */
@@ -29,12 +35,12 @@ export function OwnerLogin() {
           if (!login.isPending) login.mutate(password);
         }}
       >
-        <h1 className="text-2xl font-semibold">Modifier l’arbre familial</h1>
-        <p>
-          L’édition utilise le mot de passe du propriétaire, distinct du mot de
-          passe partagé pour consulter l’arbre.
-        </p>
-        <Label htmlFor="owner-password">Mot de passe propriétaire</Label>
+        <div className="flex justify-end">
+          <LanguageSwitcher />
+        </div>
+        <h1 className="text-2xl font-semibold">{t("auth.ownerTitle")}</h1>
+        <p>{t("auth.ownerIntro")}</p>
+        <Label htmlFor="owner-password">{t("auth.ownerPassword")}</Label>
         <Input
           id="owner-password"
           type="password"
@@ -46,18 +52,13 @@ export function OwnerLogin() {
           disabled={login.isPending}
         />
         <Button type="submit" disabled={login.isPending}>
-          {login.isPending ? "Connexion…" : "Ouvrir l’éditeur"}
+          {login.isPending ? t("auth.connecting") : t("auth.openEditor")}
         </Button>
         {login.error && (
-          <p role="alert">
-            {login.error.data?.code === "UNAUTHORIZED" ||
-            login.error.data?.code === "TOO_MANY_REQUESTS"
-              ? login.error.message
-              : "Connexion impossible. Réessayez."}
-          </p>
+          <p role="alert">{errorMessage(login.error, "auth.failed")}</p>
         )}
         <Link href="/" className="block underline">
-          Retour à l’arbre
+          {t("common.back")}
         </Link>
       </form>
     </main>

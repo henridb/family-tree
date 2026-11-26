@@ -6,9 +6,10 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { initTRPC, TRPCError } from "@trpc/server";
+import { initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError, flattenError } from "zod";
+import { UserFacingError } from "../user-facing-error";
 
 import {
   getSession,
@@ -54,6 +55,7 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
       ...shape,
       data: {
         ...shape.data,
+        messageKey: error instanceof UserFacingError ? error.messageKey : null,
         zodError:
           error.cause instanceof ZodError ? flattenError(error.cause) : null,
       },
@@ -115,10 +117,7 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
 /** Require a valid shared viewing or owner session before running a protected procedure. */
 export const protectedProcedure = publicProcedure.use(({ ctx, next }) => {
   if (!hasViewingAccess(ctx.session, ctx.ownerSession)) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: "Connexion requise.",
-    });
+    throw new UserFacingError("UNAUTHORIZED", "signIn");
   }
   return next({ ctx });
 });
@@ -126,9 +125,6 @@ export const protectedProcedure = publicProcedure.use(({ ctx, next }) => {
 /** Require a valid owner session before allowing editor data access or mutations. */
 export const ownerProcedure = publicProcedure.use(({ ctx, next }) => {
   if (!isOwner(ctx.ownerSession))
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: "Accès propriétaire requis.",
-    });
+    throw new UserFacingError("UNAUTHORIZED", "ownerRequired");
   return next({ ctx });
 });

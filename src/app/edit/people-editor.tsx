@@ -1,4 +1,6 @@
 "use client";
+
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +27,7 @@ export function PeopleEditor({
   update: (document: FamilyDocumentInput) => void;
   invalidBirthdates: ReadonlySet<string>;
 }) {
+  const t = useTranslations();
   const [selectedPerson, setSelectedPerson] = useState<string>();
   const [filter, setFilter] = useState("");
   const person = draft.people.find((p) => p.id === selectedPerson);
@@ -42,7 +45,7 @@ export function PeopleEditor({
     <section className="space-y-4 rounded-xl border border-amber-900/20 bg-white p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-semibold">
-          Personnes ({draft.people.length})
+          {t("editor.peopleCount", { count: draft.people.length })}
         </h2>
         <Button
           variant="outline"
@@ -58,11 +61,11 @@ export function PeopleEditor({
             setSelectedPerson(value.id);
           }}
         >
-          Ajouter une personne
+          {t("editor.addPerson")}
         </Button>
       </div>
       <label className={fieldStyle} htmlFor="people-filter">
-        Filtrer les personnes
+        {t("editor.filterPeople")}
         <Input
           type="search"
           id="people-filter"
@@ -73,11 +76,11 @@ export function PeopleEditor({
       <div className="grid gap-4 md:grid-cols-2">
         <ul
           className="max-h-80 space-y-1 overflow-auto"
-          aria-label="Personnes de la famille"
+          aria-label={t("editor.peopleLabel")}
         >
           {draft.people
             .filter((p) =>
-              personLabel(p)
+              personLabel(p, t("common.unnamed"))
                 .toLocaleLowerCase()
                 .includes(filter.toLocaleLowerCase()),
             )
@@ -89,26 +92,28 @@ export function PeopleEditor({
                   aria-pressed={person?.id === p.id}
                   className={`w-full rounded border p-2 text-left ${person?.id === p.id ? "border-amber-800 bg-amber-100" : "border-amber-900/15"}`}
                 >
-                  {personLabel(p)}
+                  {personLabel(p, t("common.unnamed"))}
                   {p.birthdate &&
                     !invalidBirthdates.has(p.id) &&
                     ` (${p.birthdate})`}
                   {invalidBirthdates.has(p.id) && (
                     <span className="ml-2 text-xs text-red-800">
-                      Date invalide
+                      {t("editor.invalidDate")}
                     </span>
                   )}
                   {!linked.has(p.id) && (
-                    <span className="ml-2 text-xs">Sans lien</span>
+                    <span className="ml-2 text-xs">
+                      {t("editor.unconnected")}
+                    </span>
                   )}
                 </button>
               </li>
             ))}
         </ul>
         {person ? (
-          <div className="space-y-3" aria-label="Fiche de la personne">
+          <div className="space-y-3" aria-label={t("editor.personLabel")}>
             <label className={fieldStyle} htmlFor="person-name">
-              Prénom
+              {t("person.firstName")}
               <Input
                 id="person-name"
                 value={person.name}
@@ -118,7 +123,7 @@ export function PeopleEditor({
               />
             </label>
             <label className={fieldStyle} htmlFor="person-surname">
-              Nom de naissance
+              {t("person.birthSurname")}
               <Input
                 id="person-surname"
                 value={person.surname}
@@ -128,7 +133,7 @@ export function PeopleEditor({
               />
             </label>
             <label className={fieldStyle}>
-              Sexe
+              {t("person.sex")}
               <select
                 className={selectStyle}
                 value={person.sex}
@@ -139,8 +144,8 @@ export function PeopleEditor({
                   })
                 }
               >
-                <option value="male">Masculin</option>
-                <option value="female">Féminin</option>
+                <option value="male">{t("person.male")}</option>
+                <option value="female">{t("person.female")}</option>
               </select>
             </label>
             <BirthDateField
@@ -162,13 +167,13 @@ export function PeopleEditor({
                   updatePerson({ ...person, dead: e.target.checked })
                 }
               />
-              Personne signalée comme décédée
+              {t("editor.deceased")}
             </label>
             <Button
               variant="outline"
               disabled={linked.has(person.id)}
               onClick={() => {
-                if (window.confirm("Supprimer cette personne du brouillon ?")) {
+                if (window.confirm(t("editor.confirmDeletePerson"))) {
                   update({
                     ...draft,
                     rootPersonId:
@@ -181,19 +186,14 @@ export function PeopleEditor({
                 }
               }}
             >
-              Supprimer cette personne
+              {t("editor.deletePerson")}
             </Button>
             {linked.has(person.id) && (
-              <p className="text-xs">
-                Retirez d’abord cette personne de ses unions et de ses liens de
-                filiation pour la supprimer.
-              </p>
+              <p className="text-xs">{t("editor.unlinkFirst")}</p>
             )}
           </div>
         ) : (
-          <p className="text-sm">
-            Sélectionnez une personne pour modifier sa fiche.
-          </p>
+          <p className="text-sm">{t("editor.selectPerson")}</p>
         )}
       </div>
     </section>

@@ -1,5 +1,9 @@
 "use client";
 
+import { LanguageSwitcher } from "../_components/language-switcher";
+import { useErrorMessage } from "@/i18n/error-message";
+import { useTranslations } from "next-intl";
+
 import Image from "next/image";
 import { useState, type FormEvent } from "react";
 
@@ -10,6 +14,8 @@ import { api } from "@/trpc/react";
 
 /** Render shared-password viewing login with pending and error feedback. */
 export default function LoginPage() {
+  const t = useTranslations();
+  const errorMessage = useErrorMessage();
   const [password, setPassword] = useState("");
   const login = api.login.login.useMutation({
     /**
@@ -38,18 +44,20 @@ export default function LoginPage() {
         className="flex w-full max-w-md flex-col rounded-2xl border border-amber-900/15 bg-white/85 p-6 shadow-sm sm:p-8"
         onSubmit={handleForm}
       >
+        <div className="flex justify-end">
+          <LanguageSwitcher />
+        </div>
         <div className="mb-5 flex items-center gap-3">
           <Image src="/logo.svg" alt="" width={48} height={48} />
           <p className="font-semibold tracking-wide">Family Tree</p>
         </div>
         <h1 className="text-2xl font-semibold tracking-tight">
-          Accès à l’arbre généalogique
+          {t("auth.viewerTitle")}
         </h1>
         <p className="mt-3 mb-6 text-sm leading-relaxed text-amber-900">
-          Entrez le mot de passe partagé pour retrouver l’arbre familial, ses
-          liens et ses générations.
+          {t("auth.viewerIntro")}
         </p>
-        <Label htmlFor="password">Mot de passe</Label>
+        <Label htmlFor="password">{t("auth.password")}</Label>
         <Input
           type="password"
           id="password"
@@ -68,7 +76,7 @@ export default function LoginPage() {
           className="h-11 w-full cursor-pointer bg-amber-950 text-amber-50 hover:bg-amber-900"
           disabled={login.isPending}
         >
-          {login.isPending ? "Connexion…" : "Entrer"}
+          {login.isPending ? t("auth.connecting") : t("auth.enter")}
         </Button>
         {login.error && (
           <p
@@ -76,10 +84,7 @@ export default function LoginPage() {
             role="alert"
             className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-950"
           >
-            {login.error.data?.code === "UNAUTHORIZED" ||
-            login.error.data?.code === "TOO_MANY_REQUESTS"
-              ? login.error.message
-              : "Connexion impossible. Réessayez."}
+            {errorMessage(login.error, "auth.failed")}
           </p>
         )}
       </form>

@@ -188,6 +188,7 @@ before(async () => {
     ...process.env,
     NODE_ENV: "production",
     NEXT_TELEMETRY_DISABLED: "1",
+    DEFAULT_LOCALE: useRedis ? "en-US" : "fr-FR",
     // The Vercel path must work without access to any SQLite file.
     DATABASE_URL: useRedis
       ? "file:/unavailable-family-fixture/db.sqlite"
@@ -646,3 +647,51 @@ test(
     assert.equal(redisRequests, 2);
   },
 );
+
+test("concurrent requests render independent locale preferences and translated metadata", async () => {
+  const cases = [
+    ["fr-FR", "fr-FR", "Accès à l’arbre généalogique", "Arbre familial"],
+    ["en-US", "en-US", "Access the family tree", "Family tree"],
+    useRedis
+      ? ["unsupported", "en-US", "Access the family tree", "Family tree"]
+      : [
+          "unsupported",
+          "fr-FR",
+          "Accès à l’arbre généalogique",
+          "Arbre familial",
+        ],
+  ];
+  await Promise.all(
+    cases.map(async ([cookie, locale, heading, title]) => {
+      const response = await fetch(`${baseUrl}/login`, {
+        headers: { cookie: `family-tree-locale=${cookie}` },
+      });
+      assert.equal(response.status, 200);
+      const html = await response.text();
+      assert.ok(html.includes(`lang="${locale}"`), locale);
+      assert.ok(html.includes(heading), heading);
+      assert.ok(html.includes(`<title>${title}</title>`), title);
+    }),
+  );
+  const defaultResponse = await fetch(`${baseUrl}/login`);
+  assert.ok(
+    (await defaultResponse.text()).includes(
+      `lang="${useRedis ? "en-US" : "fr-FR"}"`,
+    ),
+  );
+  const missing = await fetch(`${baseUrl}/a-missing-page`, {
+    headers: { cookie: "family-tree-locale=en-US" },
+  });
+  assert.equal(missing.status, 404);
+  assert.ok((await missing.text()).includes("Page not found"));
+});
+
+test("login failures retain their API code and fallback message with a translation identifier", async () => {
+  const { api } = client("family-tree-locale=en-US");
+  await assert.rejects(api.login.login.mutate("wrong password"), (error) => {
+    assert.equal(error.data.code, "UNAUTHORIZED");
+    assert.equal(error.data.messageKey, "wrongPassword");
+    assert.equal(error.message, "Mauvais mot de passe.");
+    return true;
+  });
+});

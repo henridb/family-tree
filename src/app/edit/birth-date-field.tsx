@@ -1,12 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Input } from "@/components/ui/input";
 import { fieldStyle } from "./editor-fields";
-
-const message =
-  "Date invalide. Utilisez AAAA, AAAA-MM ou AAAA-MM-JJ (ex. 1956-02).";
 
 /**
  * Render a controlled birth-date field with stable help text and an accessible
@@ -26,6 +25,8 @@ export function BirthDateField({
   invalid: boolean;
   onChange: (value: string) => void;
 }) {
+  const t = useTranslations();
+  const message = t("editor.invalidDateHint");
   const inputRef = useRef<HTMLInputElement>(null);
   const tooltipRef = useRef<HTMLSpanElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -80,15 +81,15 @@ export function BirthDateField({
       document.removeEventListener("scroll", position, true);
       document.removeEventListener("keydown", dismiss);
     };
-  }, [open, value]);
+  }, [open, value, message]);
 
   return (
     <div className={fieldStyle}>
-      <label htmlFor="person-birthdate">Date de naissance</label>
+      <label htmlFor="person-birthdate">{t("person.birthDate")}</label>
       <Input
         ref={inputRef}
         id="person-birthdate"
-        placeholder="AAAA, AAAA-MM ou AAAA-MM-JJ"
+        placeholder={t("editor.datePlaceholder")}
         value={value}
         aria-invalid={invalid || undefined}
         aria-describedby={
@@ -112,7 +113,7 @@ export function BirthDateField({
         onPointerLeave={leave}
       />
       <span id="person-birthdate-help" className="text-xs">
-        Conservez la précision connue, ou laissez vide si la date est inconnue.
+        {t("editor.datePrecision")}
       </span>
       {invalid &&
         (open ? (

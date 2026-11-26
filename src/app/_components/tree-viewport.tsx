@@ -1,3 +1,4 @@
+import { useLocale, useTranslations } from "next-intl";
 import {
   useCallback,
   useLayoutEffect,
@@ -49,6 +50,8 @@ export function TreeViewport({
   hasTree?: boolean;
   overviewVersion?: number;
 }) {
+  const t = useTranslations("viewer");
+  const locale = useLocale();
   // Recalculate connectors after display settings change the tree's layout.
   useXarrow();
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -240,13 +243,13 @@ export function TreeViewport({
   const navigation = (
     <div
       className="flex flex-wrap items-center gap-2 border-t border-amber-900/20 pt-3"
-      aria-label="Commandes de navigation"
+      aria-label={t("navigationControls")}
       role="group"
     >
       {isDiagram && (
         <div
           role="group"
-          aria-label="Zoom"
+          aria-label={t("zoom")}
           className="inline-flex divide-x divide-amber-900/20 rounded-md border border-amber-900/20 bg-white/60"
         >
           <Button
@@ -255,7 +258,7 @@ export function TreeViewport({
             className="h-9 w-9 rounded-none rounded-l-md px-0 text-base text-amber-950 not-disabled:hover:bg-amber-900/10 focus-visible:relative focus-visible:z-10 lg:h-8 lg:w-8"
             onClick={() => zoom(scale / 1.25)}
             disabled={!hasTree || scale <= 0.005}
-            aria-label="Réduire le zoom"
+            aria-label={t("zoomOut")}
           >
             −
           </Button>
@@ -265,9 +268,12 @@ export function TreeViewport({
             className="h-9 w-18 rounded-none px-1 text-xs text-amber-950 tabular-nums not-disabled:hover:bg-amber-900/10 focus-visible:relative focus-visible:z-10 lg:h-8"
             onClick={() => zoom(1)}
             disabled={!hasTree}
-            aria-label="Rétablir le zoom à 100 %"
+            aria-label={t("zoomReset")}
           >
-            {(scale * 100).toLocaleString("fr", { maximumFractionDigits: 1 })} %
+            {scale.toLocaleString(locale, {
+              style: "percent",
+              maximumFractionDigits: 1,
+            })}
           </Button>
           <Button
             size="sm"
@@ -275,7 +281,7 @@ export function TreeViewport({
             className="h-9 w-9 rounded-none rounded-r-md px-0 text-base text-amber-950 not-disabled:hover:bg-amber-900/10 focus-visible:relative focus-visible:z-10 lg:h-8 lg:w-8"
             onClick={() => zoom(scale * 1.25)}
             disabled={!hasTree || scale >= 2}
-            aria-label="Augmenter le zoom"
+            aria-label={t("zoomIn")}
           >
             +
           </Button>
@@ -292,7 +298,7 @@ export function TreeViewport({
             onClick={fit}
             disabled={!hasTree}
           >
-            Tout voir
+            {t("fit")}
           </Button>
         )}
         <Button
@@ -302,7 +308,7 @@ export function TreeViewport({
           onClick={centerRoot}
           disabled={!hasTree}
         >
-          Recentrer
+          {t("center")}
         </Button>
         <Button
           size="sm"
@@ -311,7 +317,7 @@ export function TreeViewport({
           onClick={onExpandAll}
           disabled={!hasCollapsed}
         >
-          Tout déplier
+          {t("expand")}
         </Button>
       </div>
     </div>
@@ -319,22 +325,20 @@ export function TreeViewport({
 
   return (
     <section
-      aria-label="Navigation de la famille"
+      aria-label={t("navigation")}
       className="flex min-h-0 min-w-0 flex-1 flex-col"
     >
       {renderControls(navigation)}
       {isDiagram && (
         <p id="tree-navigation-help" className="sr-only">
-          Utilisez les flèches pour passer d’une fiche à l’autre, Début pour
-          revenir à la racine et Fin pour atteindre la dernière fiche. Entrée
-          ouvre les détails.
+          {t("keyboardHelp")}
         </p>
       )}
       <div
         ref={viewportRef}
         id="tree-viewport"
         role="region"
-        aria-label={isDiagram ? "Arbre généalogique" : "Arbre familial compact"}
+        aria-label={isDiagram ? t("title") : t("compactRegion")}
         aria-describedby={isDiagram ? "tree-navigation-help" : undefined}
         // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Keyboard users need to focus this scrollable region to pan it.
         tabIndex={0}

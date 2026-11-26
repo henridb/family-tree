@@ -1,8 +1,9 @@
-import type { MouseEvent } from "react";
-import type { person } from "@/types/family";
+import { Button } from "@/components/ui/button";
 import { currentPartner, type FamilyContext } from "@/lib/family-context";
 import { partnershipElementId } from "@/lib/family-identities";
-import { Button } from "@/components/ui/button";
+import type { person } from "@/types/family";
+import { useTranslations } from "next-intl";
+import type { MouseEvent } from "react";
 import { PersonCard } from "../tree";
 
 type OutlineOptions = {
@@ -28,16 +29,17 @@ export function FamilyOutline({
   empty,
   ...options
 }: OutlineOptions & { tree: person; empty: boolean }) {
+  const t = useTranslations("viewer");
   return (
     <section className="px-3 py-4">
       <h2 className="text-base font-semibold text-amber-950">
-        La famille, branche par branche
+        {t("outlineTitle")}
       </h2>
       <p className="mt-1 mb-4 text-xs leading-5 text-amber-900">
-        Les enfants sont regroupés sous chaque couple.
+        {t("outlineIntro")}
       </p>
       {empty ? (
-        <p>Essayez un autre prénom ou nom de famille.</p>
+        <p>{t("tryNames")}</p>
       ) : (
         <ol>
           <OutlinePerson person={tree} isRoot {...options} />
@@ -58,6 +60,8 @@ function OutlinePerson({
   isRoot = false,
   ...options
 }: OutlineOptions & { person: person; isRoot?: boolean }) {
+  const t = useTranslations("person");
+  const viewer = useTranslations("viewer");
   const spouse = currentPartner(person);
   const cardOptions = {
     compact: true,
@@ -83,7 +87,9 @@ function OutlinePerson({
       />
       {Boolean(partners?.length) && (
         <ol
-          aria-label={`Unions de ${person.name} ${person.surname}`}
+          aria-label={t("unions", {
+            name: `${person.name} ${person.surname}`,
+          })}
           className="mt-1 space-y-2"
         >
           {partners?.map((partner) => {
@@ -99,7 +105,7 @@ function OutlinePerson({
               <li key={partner.id} data-outline-partnership={branchId}>
                 <div className="flex min-w-0 items-start gap-1.5">
                   <span className="w-3 shrink-0 rotate-180 self-center text-[11px] leading-none whitespace-nowrap text-amber-900 [writing-mode:vertical-rl]">
-                    {partner.divorced ? "Précédent" : "Avec"}
+                    {partner.divorced ? viewer("previous") : viewer("with")}
                   </span>
                   <div className="min-w-0 flex-1">
                     <PersonCard
@@ -126,7 +132,13 @@ function OutlinePerson({
                       }
                       aria-expanded={!collapsed}
                       aria-controls={branchId}
-                      aria-label={`${collapsed ? "Afficher" : "Masquer"} les descendants de ${person.name} ${person.surname} et ${partner.name} ${partner.surname}`}
+                      aria-label={t(
+                        collapsed ? "showDescendants" : "hideDescendants",
+                        {
+                          first: `${person.name} ${person.surname}`,
+                          second: `${partner.name} ${partner.surname}`,
+                        },
+                      )}
                       onClick={(event) =>
                         options.onToggleBranch(person.id, partner.id, event)
                       }
@@ -139,7 +151,10 @@ function OutlinePerson({
                   <ol
                     id={branchId}
                     hidden={collapsed}
-                    aria-label={`Enfants de ${person.name} et ${partner.name}`}
+                    aria-label={t("children", {
+                      first: person.name,
+                      second: partner.name,
+                    })}
                     className="outline-children mt-2 ml-2 space-y-2 pl-3"
                   >
                     {partner.children?.map((child) => (

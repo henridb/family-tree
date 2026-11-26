@@ -1,4 +1,6 @@
 "use client";
+
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,6 +31,7 @@ export function PartnershipsEditor({
   draft: FamilyDocumentInput;
   update: (document: FamilyDocumentInput) => void;
 }) {
+  const t = useTranslations();
   const [expandedUnionId, setExpandedUnionId] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -44,7 +47,9 @@ export function PartnershipsEditor({
     )
       list.scrollTop += headingBounds.top - top;
   }, [expandedUnionId]);
-  const names = new Map(draft.people.map((p) => [p.id, personLabel(p)]));
+  const names = new Map(
+    draft.people.map((p) => [p.id, personLabel(p, t("common.unnamed"))]),
+  );
   /** Replace one union by permanent ID in a copied partnership array. */
   function updatePartnership(value: FamilyPartnershipInput) {
     update({
@@ -58,7 +63,7 @@ export function PartnershipsEditor({
     <section className="space-y-4 rounded-xl border border-amber-900/20 bg-white p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-semibold">
-          Unions ({draft.partnerships.length})
+          {t("editor.unionsCount", { count: draft.partnerships.length })}
         </h2>
         <Button
           variant="outline"
@@ -82,14 +87,10 @@ export function PartnershipsEditor({
             setExpandedUnionId(id);
           }}
         >
-          Ajouter une union
+          {t("editor.addUnion")}
         </Button>
       </div>
-      <p className="text-sm">
-        L’ordre des unions détermine l’ordre des partenaires. Chaque union
-        possède sa propre liste d’enfants. Supprimer une union conserve toutes
-        ses personnes.
-      </p>
+      <p className="text-sm">{t("editor.unionsIntro")}</p>
       <div
         ref={listRef}
         className="max-h-[min(36rem,70dvh)] space-y-4 overflow-y-auto"
@@ -117,8 +118,10 @@ export function PartnershipsEditor({
                   className="flex min-h-12 w-full cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-2 text-left font-medium hover:bg-amber-50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-amber-900"
                 >
                   <span>
-                    {names.get(union.personIds[0])} et{" "}
-                    {names.get(union.personIds[1])}
+                    {t("person.couple", {
+                      first: names.get(union.personIds[0]) ?? "",
+                      second: names.get(union.personIds[1]) ?? "",
+                    })}
                   </span>
                   <ChevronDown
                     aria-hidden="true"
@@ -138,7 +141,7 @@ export function PartnershipsEditor({
                     <div className="grid gap-3 sm:grid-cols-2">
                       {([0, 1] as const).map((position) => (
                         <label className={fieldStyle} key={position}>
-                          Partenaire {position + 1}
+                          {t("editor.partnerNumber", { number: position + 1 })}
                           <select
                             className={selectStyle}
                             value={union.personIds[position]}
@@ -150,7 +153,7 @@ export function PartnershipsEditor({
                               updatePartnership({ ...union, personIds: ids });
                             }}
                           >
-                            {personOptions(draft.people)}
+                            {personOptions(draft.people, t("common.unnamed"))}
                           </select>
                         </label>
                       ))}
@@ -166,17 +169,14 @@ export function PartnershipsEditor({
                           })
                         }
                       />
-                      Union signalée comme divorcée
+                      {t("editor.divorced")}
                     </label>
                     <p className="text-sm text-amber-900">
-                      L’arbre classe les enfants par date de naissance, du plus
-                      âgé au plus jeune, avec les dates inconnues à la fin.
-                      L’ordre ci-dessous départage les dates identiques ou
-                      inconnues.
+                      {t("editor.childrenOrderIntro")}
                     </p>
                     <ol
                       className="space-y-2"
-                      aria-label="Ordre enregistré des enfants"
+                      aria-label={t("editor.childrenOrder")}
                     >
                       {union.childIds.map((id, childIndex) => (
                         <li
@@ -186,7 +186,9 @@ export function PartnershipsEditor({
                           <span className="mr-auto">{names.get(id)}</span>
                           <Button
                             variant="outline"
-                            aria-label={`Monter ${names.get(id)}`}
+                            aria-label={t("editor.personUp", {
+                              name: names.get(id) ?? t("common.unnamed"),
+                            })}
                             disabled={childIndex === 0}
                             onClick={() =>
                               updatePartnership({
@@ -199,7 +201,9 @@ export function PartnershipsEditor({
                           </Button>
                           <Button
                             variant="outline"
-                            aria-label={`Descendre ${names.get(id)}`}
+                            aria-label={t("editor.personDown", {
+                              name: names.get(id) ?? t("common.unnamed"),
+                            })}
                             disabled={childIndex === union.childIds.length - 1}
                             onClick={() =>
                               updatePartnership({
@@ -221,13 +225,13 @@ export function PartnershipsEditor({
                               })
                             }
                           >
-                            Retirer le lien
+                            {t("editor.unlink")}
                           </Button>
                         </li>
                       ))}
                     </ol>
                     <label className={fieldStyle}>
-                      Ajouter un enfant à cette union
+                      {t("editor.addChild")}
                       <select
                         className={selectStyle}
                         value=""
@@ -239,7 +243,7 @@ export function PartnershipsEditor({
                             });
                         }}
                       >
-                        <option value="">Choisir une personne existante</option>
+                        <option value="">{t("editor.choosePerson")}</option>
                         {personOptions(
                           draft.people.filter(
                             (p) =>
@@ -248,6 +252,7 @@ export function PartnershipsEditor({
                                 u.childIds.includes(p.id),
                               ),
                           ),
+                          t("common.unnamed"),
                         )}
                       </select>
                     </label>
@@ -262,7 +267,7 @@ export function PartnershipsEditor({
                           })
                         }
                       >
-                        Monter l’union
+                        {t("editor.unionUp")}
                       </Button>
                       <Button
                         variant="outline"
@@ -274,16 +279,12 @@ export function PartnershipsEditor({
                           })
                         }
                       >
-                        Descendre l’union
+                        {t("editor.unionDown")}
                       </Button>
                       <Button
                         variant="outline"
                         onClick={() => {
-                          if (
-                            window.confirm(
-                              "Supprimer cette union ? Ses personnes seront conservées.",
-                            )
-                          ) {
+                          if (window.confirm(t("editor.confirmDeleteUnion"))) {
                             update({
                               ...draft,
                               partnerships: draft.partnerships.filter(
@@ -294,7 +295,7 @@ export function PartnershipsEditor({
                           }
                         }}
                       >
-                        Supprimer l’union
+                        {t("editor.deleteUnion")}
                       </Button>
                     </div>
                   </>

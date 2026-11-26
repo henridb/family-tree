@@ -1,5 +1,11 @@
 "use client";
 
+import { LanguageSwitcher } from "../_components/language-switcher";
+import { useErrorMessage } from "@/i18n/error-message";
+import { validationFeedback } from "@/i18n/validation";
+
+import { useTranslations } from "next-intl";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ZodError } from "zod";
 import { PeopleEditor } from "./people-editor";
@@ -52,6 +58,7 @@ function download(document: FamilyDocument, format: "document" | "tree") {
  * redirect unauthorized owners and provide retry feedback for failed reads.
  */
 export function FamilyEditorLoader() {
+  const t = useTranslations();
   const router = useRouter();
   const query = api.editor.read.useQuery(undefined, {
     retry: false,
@@ -65,14 +72,16 @@ export function FamilyEditorLoader() {
   if (query.isPending)
     return (
       <main className="p-8" role="status">
-        Chargement de l’éditeur…
+        {t("editor.loading")}
       </main>
     );
   if (!query.data)
     return (
       <main className="p-8" role="alert">
-        Impossible de charger l’éditeur.{" "}
-        <Button onClick={() => void query.refetch()}>Réessayer</Button>
+        {t("editor.failed")}{" "}
+        <Button onClick={() => void query.refetch()}>
+          {t("common.retry")}
+        </Button>
       </main>
     );
   return (
@@ -81,7 +90,7 @@ export function FamilyEditorLoader() {
       reload={async () => {
         const result = await query.refetch();
         if (!result.data || result.error)
-          throw new Error("Le rechargement a échoué.");
+          throw new Error(t("editor.reloadFailed"));
         return result.data;
       }}
     />
@@ -104,13 +113,21 @@ function FamilyEditor({
   initial: Snapshot;
   reload: () => Promise<Snapshot>;
 }) {
+  const t = useTranslations();
+  const errorMessage = useErrorMessage();
   const [base, setBase] = useState(initial.document);
   const [draft, setDraft] = useState<FamilyDocumentInput>(() =>
     structuredClone(initial.document ?? emptyDocument),
   );
   const [history, setHistory] = useState(initial.history);
-  const [message, setMessage] = useState("");
-  const [fileError, setFileError] = useState("");
+  const [message, setMessage] = useState<
+    | ""
+    | "editor.saved"
+    | "editor.savedHistoryFailed"
+    | "editor.reloaded"
+    | "editor.reloadPreserved"
+  >("");
+  const [fileError, setFileError] = useState(false);
   const [loading, setLoading] = useState(false);
   const leaveWithoutSaving = useRef(false);
   const dirty = JSON.stringify(draft) !== JSON.stringify(base ?? emptyDocument);
@@ -121,14 +138,13 @@ function FamilyEditor({
       return {
         document,
         tree,
-        error: "",
+        error: null,
         diagnostics: "",
         invalidBirthdates: new Set<string>(),
       };
     } catch (error) {
       const invalidBirthdates = new Set<string>();
-      let message =
-        error instanceof Error ? error.message : "Document invalide.";
+      let feedback = validationFeedback(error);
       if (error instanceof ZodError) {
         const otherIssues = error.issues.filter((issue) => {
           const [field, index, property] = issue.path;
@@ -143,12 +159,14 @@ function FamilyEditor({
           }
           return true;
         });
-        message = otherIssues[0]?.message ?? "";
+        feedback = otherIssues[0]
+          ? validationFeedback(new ZodError([otherIssues[0]]))
+          : null;
       }
       return {
         document: null,
         tree: null,
-        error: message,
+        error: feedback,
         diagnostics:
           error instanceof ZodError
             ? JSON.stringify(error.issues, null, 2)
@@ -200,15 +218,11 @@ function FamilyEditor({
     setLoading(true);
     setDraft(document);
     setBase(document);
-    setMessage(
-      "Modifications enregistrées. Elles sont visibles dans l’arbre au prochain chargement.",
-    );
+    setMessage("editor.saved");
     try {
       setHistory((await reload()).history);
     } catch {
-      setMessage(
-        "Modifications enregistrées. L’historique n’a pas pu être rechargé.",
-      );
+      setMessage("editor.savedHistoryFailed");
     } finally {
       setLoading(false);
     }
@@ -221,25 +235,19 @@ function FamilyEditor({
    * validation-independent feedback only after a successful read.
    */
   async function reloadSaved() {
-    if (
-      dirty &&
-      !window.confirm(
-        "Abandonner les modifications non enregistrées et recharger l’arbre ?",
-      )
-    )
-      return;
+    if (dirty && !window.confirm(t("editor.confirmReload"))) return;
     setLoading(true);
     try {
       const snapshot = await reload();
       setBase(snapshot.document);
       setDraft(structuredClone(snapshot.document ?? emptyDocument));
       setHistory(snapshot.history);
-      setMessage("Version enregistrée rechargée.");
+      setMessage("editor.reloaded");
       save.reset();
       restore.reset();
-      setFileError("");
+      setFileError(false);
     } catch {
-      setMessage("Impossible de recharger. Votre brouillon est conservé.");
+      setMessage("editor.reloadPreserved");
     } finally {
       setLoading(false);
     }
@@ -248,38 +256,31 @@ function FamilyEditor({
     <main className="min-h-dvh bg-amber-50 px-4 py-6 text-amber-950 sm:px-8">
       <div className="mx-auto max-w-6xl space-y-6">
         <header className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-2xl font-semibold">
-            Éditeur de l’arbre familial
-          </h1>
-          <div className="flex flex-wrap gap-3">
+          <h1 className="text-2xl font-semibold">{t("editor.title")}</h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <LanguageSwitcher />
             <a
               href="/"
               target="_blank"
               rel="noreferrer"
               className="self-center underline"
             >
-              Voir l’arbre enregistré
+              {t("editor.viewSaved")}
             </a>
             <Button
               variant="outline"
               disabled={busy}
               onClick={() => {
-                if (
-                  !dirty ||
-                  window.confirm("Quitter sans enregistrer le brouillon ?")
-                ) {
+                if (!dirty || window.confirm(t("editor.confirmQuit"))) {
                   logout.mutate();
                 }
               }}
             >
-              Quitter l’édition
+              {t("editor.quit")}
             </Button>
           </div>
         </header>
-        <p>
-          Les modifications restent dans ce brouillon jusqu’à l’enregistrement.
-          Les personnes sans lien peuvent être ajoutées progressivement.
-        </p>
+        <p>{t("editor.draftIntro")}</p>
         <div className="flex flex-wrap items-center gap-3">
           <Button
             disabled={busy || !validation.document || (!dirty && base !== null)}
@@ -294,20 +295,20 @@ function FamilyEditor({
               );
             }}
           >
-            {save.isPending ? "Enregistrement…" : "Enregistrer"}
+            {save.isPending ? t("editor.saving") : t("editor.save")}
           </Button>
           <Button
             variant="outline"
             disabled={busy}
             onClick={() => void reloadSaved()}
           >
-            Recharger la version enregistrée
+            {t("editor.reload")}
           </Button>
           <span className="text-sm">
-            {base ? `Version ${base.revision}` : "Arbre non initialisé"} ·{" "}
-            {dirty
-              ? "Modifications non enregistrées"
-              : "Aucune modification en attente"}
+            {base
+              ? t("editor.version", { revision: base.revision })
+              : t("editor.notInitialized")}{" "}
+            · {dirty ? t("editor.unsaved") : t("editor.noChanges")}
           </span>
         </div>
         {message && (
@@ -315,23 +316,23 @@ function FamilyEditor({
             role="status"
             className="rounded border border-amber-900/20 bg-white p-3"
           >
-            {message}
+            {t(message)}
           </p>
         )}
         {(save.error ?? restore.error ?? logout.error) && (
           <p role="alert" className="rounded bg-red-50 p-3">
-            {(save.error ?? restore.error ?? logout.error)?.message} Vous pouvez
-            télécharger votre brouillon avant de recharger.
+            {errorMessage(save.error ?? restore.error ?? logout.error)}{" "}
+            {t("editor.downloadBeforeReload")}
           </p>
         )}
         <fieldset disabled={busy} className="space-y-6 disabled:opacity-60">
-          <legend className="sr-only">Contenu de l’arbre</legend>
+          <legend className="sr-only">{t("editor.contents")}</legend>
           <section className="grid gap-4 rounded-xl border border-amber-900/20 bg-white p-4 sm:grid-cols-2">
             <h2 className="text-lg font-semibold sm:col-span-2">
-              Arbre affiché
+              {t("editor.displayedTree")}
             </h2>
             <label className={fieldStyle} htmlFor="editor-title">
-              Titre
+              {t("editor.familyTitle")}
               <Input
                 id="editor-title"
                 value={draft.title}
@@ -339,7 +340,7 @@ function FamilyEditor({
               />
             </label>
             <label className={fieldStyle}>
-              Personne de départ
+              {t("editor.root")}
               <select
                 className={selectStyle}
                 value={draft.rootPersonId ?? ""}
@@ -347,8 +348,8 @@ function FamilyEditor({
                   update({ ...draft, rootPersonId: e.target.value || null })
                 }
               >
-                <option value="">Aucune pour le moment</option>
-                {personOptions(draft.people)}
+                <option value="">{t("editor.noRoot")}</option>
+                {personOptions(draft.people, t("common.unnamed"))}
               </select>
             </label>
           </section>
@@ -359,30 +360,26 @@ function FamilyEditor({
           />
           <PartnershipsEditor draft={draft} update={update} />
           <section className="space-y-3 rounded-xl border border-amber-900/20 bg-white p-4">
-            <h2 className="text-lg font-semibold">Transférer et sauvegarder</h2>
-            <p className="text-sm">
-              Le document complet conserve toutes les personnes et les liens. Le
-              JSON de l’arbre contient uniquement la vue choisie. Le format du
-              fichier importé est détecté automatiquement.
-            </p>
+            <h2 className="text-lg font-semibold">{t("editor.transfer")}</h2>
+            <p className="text-sm">{t("editor.transferIntro")}</p>
             <div className="flex flex-wrap gap-2">
               <Button
                 variant="outline"
                 disabled={!validation.document}
                 onClick={() => download(validation.document!, "document")}
               >
-                Télécharger le document complet
+                {t("editor.downloadDocument")}
               </Button>
               <Button
                 variant="outline"
                 disabled={!validation.document || !validation.tree}
                 onClick={() => download(validation.document!, "tree")}
               >
-                Télécharger le JSON de l’arbre
+                {t("editor.downloadTree")}
               </Button>
             </div>
             <label className={fieldStyle} htmlFor="editor-import">
-              Importer un fichier JSON (remplace le brouillon)
+              {t("editor.import")}
               <Input
                 id="editor-import"
                 type="file"
@@ -393,10 +390,7 @@ function FamilyEditor({
                   e.target.value = "";
                   if (
                     !file ||
-                    (dirty &&
-                      !window.confirm(
-                        "Remplacer le brouillon par le fichier importé ?",
-                      ))
+                    (dirty && !window.confirm(t("editor.confirmImport")))
                   )
                     return;
                   setLoading(true);
@@ -406,26 +400,18 @@ function FamilyEditor({
                       const document = importFamilyJson(text);
                       projectFamilyDocument(document);
                       update({ ...document, revision: base?.revision ?? 0 });
-                      setFileError("");
+                      setFileError(false);
                     })
-                    .catch(() =>
-                      setFileError(
-                        "Fichier JSON invalide ou arbre incompatible avec la vue actuelle. Le brouillon est conservé.",
-                      ),
-                    )
+                    .catch(() => setFileError(true))
                     .finally(() => setLoading(false));
                 }}
               />
             </label>
-            {fileError && <p role="alert">{fileError}</p>}
+            {fileError && <p role="alert">{t("editor.importInvalid")}</p>}
           </section>
           <section className="space-y-3 rounded-xl border border-amber-900/20 bg-white p-4">
-            <h2 className="text-lg font-semibold">Versions précédentes</h2>
-            <p className="text-sm">
-              Les dix dernières versions sont conservées. Une restauration crée
-              une nouvelle version ; elle n’efface pas la version actuelle.
-              Téléchargez aussi des sauvegardes indépendantes.
-            </p>
+            <h2 className="text-lg font-semibold">{t("editor.history")}</h2>
+            <p className="text-sm">{t("editor.historyIntro")}</p>
             <ul className="space-y-2">
               {history.map((previous) => (
                 <li
@@ -433,17 +419,13 @@ function FamilyEditor({
                   className="flex flex-wrap items-center justify-between gap-2"
                 >
                   <span>
-                    Version {previous.revision} — {previous.title}
+                    {t("editor.version", { revision: previous.revision })} —{" "}
+                    {previous.title}
                   </span>
                   <Button
                     variant="outline"
                     onClick={() => {
-                      if (
-                        base &&
-                        window.confirm(
-                          "Restaurer cette version et remplacer le brouillon ?",
-                        )
-                      )
+                      if (base && window.confirm(t("editor.confirmRestore")))
                         restore.mutate(
                           {
                             revision: previous.revision,
@@ -459,13 +441,13 @@ function FamilyEditor({
                         );
                     }}
                   >
-                    Restaurer
+                    {t("editor.restore")}
                   </Button>
                 </li>
               ))}
             </ul>
             {history.length === 0 && (
-              <p className="text-sm">Aucune version précédente.</p>
+              <p className="text-sm">{t("editor.noHistory")}</p>
             )}
           </section>
         </fieldset>
@@ -478,22 +460,23 @@ function FamilyEditor({
               id="editor-validation-heading"
               className="text-lg font-semibold"
             >
-              Validation du document
+              {t("editor.validation")}
             </h2>
             <p role="status" className="text-sm">
-              L’enregistrement est bloqué :{" "}
-              {validation.error ||
-                "corrigez les dates de naissance signalées dans les fiches des personnes."}
+              {t("editor.saveBlocked")}{" "}
+              {validation.error
+                ? t(validation.error.key, validation.error.values)
+                : t("editor.fixBirthdates")}
             </p>
             {validation.diagnostics && (
               <details>
                 <summary className="cursor-pointer text-sm font-medium">
-                  Détails de la validation
+                  {t("editor.diagnostics")}
                 </summary>
                 <textarea
                   readOnly
                   rows={12}
-                  aria-label="Diagnostics complets de validation"
+                  aria-label={t("editor.fullDiagnostics")}
                   value={validation.diagnostics}
                   className="mt-3 max-h-80 w-full resize-y rounded border border-red-200 bg-white p-3 font-mono text-xs"
                 />
